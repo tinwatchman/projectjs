@@ -1,0 +1,15 @@
+{
+  "name": "projectjs",
+  "version": "0.0.1",
+  "description": "Javaish project structure to keep Node applications simple and organized",
+  "main": "project.js",
+  "keywords": [
+    "project"
+  ],
+  "author": "Jon Stout",
+  "license": "MIT",
+  "dependencies": {
+    "findup-sync": "^0.2.1",
+    "underscore": "^1.8.3"
+  }
+}

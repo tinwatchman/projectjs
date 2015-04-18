@@ -1,0 +1,10 @@
+{
+  "name": "projectjs-example",
+  "version": "0.0.1",
+  "description": "Sample Project.js application",
+  "author": "Jon Stout",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.12.3"
+  }
+}

@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+
+'use strict';
+
+var findup = require('findup-sync');
+var path = findup("project.json");
+console.log(process.argv);
