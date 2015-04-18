@@ -1,15 +1,26 @@
 {
   "name": "projectjs",
   "version": "0.0.1",
-  "description": "Javaish project structure to keep Node applications simple and organized",
+  "description": "Javaish project structure and organization to bring order to your Node apps",
+  "scripts": {
+    "test": "jasmine"
+  },
   "main": "project.js",
   "keywords": [
     "project"
   ],
-  "author": "Jon Stout",
+  "author": {
+    "name": "Jon Stout",
+    "url": "www.jonstout.net"
+  },
   "license": "MIT",
   "dependencies": {
     "findup-sync": "^0.2.1",
     "underscore": "^1.8.3"
-  }
+  },
+  "devDependencies": {
+    "jasmine": "^2.2.1"
+  },
+  "preferGlobal": true,
+  "private": true
 }
