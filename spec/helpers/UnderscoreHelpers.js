@@ -25,6 +25,16 @@ beforeEach(function() {
                 }
             };
         },
+        toBeObject: function(util, customEqualityTesters) {
+            return {
+                compare: function(actual) {
+                    var isPass = util.equals(_.isObject(actual), true, customEqualityTesters);
+                    return {
+                        pass: isPass
+                    };
+                }
+            };
+        },
         toHave: function() {
             return {
                 compare: function(actual, expected) {
@@ -39,6 +49,25 @@ beforeEach(function() {
                 compare: function(actual, expected) {
                     return {
                         pass: !_.has(actual, expected)
+                    };
+                }
+            };
+        },
+        toHaveLength: function(util, customEqualityTesters) {
+            return {
+                compare: function(actual, expected) {
+                    var length;
+                    if (_.isArray(actual) || _.isString(actual)) {
+                        length = actual.length;
+                    } else if (_.isObject(actual)) {
+                        length = _.keys(actual).length;
+                    } else if (_.isNumber(actual)) {
+                        length = String(actual).length;
+                    } else {
+                        throw new Error("Given item does not have an applicable length property!");
+                    }
+                    return {
+                        pass: util.equals(length, expected, customEqualityTesters)
                     };
                 }
             };
