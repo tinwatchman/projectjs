@@ -15,6 +15,16 @@ beforeEach(function() {
                 }
             }
         },
+        toBeArray: function(util, customEqualityTesters) {
+            return {
+                compare: function(actual) {
+                    var isPass = util.equals(_.isArray(actual), true, customEqualityTesters);
+                    return {
+                        pass: isPass
+                    };
+                }
+            };
+        },
         toHave: function() {
             return {
                 compare: function(actual, expected) {
