@@ -12,7 +12,9 @@ describe("ProjectJsRegistry", function() {
                     "some.namespace.package.*": [
                         "some.namespace.package.SomeClass",
                         "some.namespace.package.SomeOtherClass"
-                    ],
+                    ]
+                },
+                "dependencies": {
                     "dependency": "./lib/dependency"
                 },
                 "aliases": {
@@ -32,7 +34,7 @@ describe("ProjectJsRegistry", function() {
             expect(registry.resolve("some.namespace.package.SomeClass")).toEqual("./package/SomeClass");
         });
 
-        it("should support unnamespaced dependencies", function() {
+        it("should support dependencies", function() {
             expect(registry.resolve("dependency")).toEqual("./lib/dependency");
         });
 
@@ -77,7 +79,9 @@ describe("ProjectJsRegistry", function() {
                     "some.namespace.package.SomeClass": "./package/SomeClass",
                     "some.namespace.package.*": [
                         "some.namespace.package.SomeClass"
-                    ],
+                    ]
+                },
+                "dependencies": {
                     "dependency": "./lib/dependency/main"
                 },
                 "aliases": {
@@ -104,6 +108,12 @@ describe("ProjectJsRegistry", function() {
 
         it("should NOT be added to the end of dependency file paths", function() {
             expect(registry.resolve("dependency")).toEqual("./lib/dependency/main");
+        });
+
+        it("should be accessible and settable via useCompileSuffix", function() {
+            expect(registry.useCompileSuffix()).toBe(true);
+            registry.useCompileSuffix(false);
+            expect(registry.useCompileSuffix()).toBe(false);
         });
     });
 });

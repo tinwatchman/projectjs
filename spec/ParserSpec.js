@@ -1,6 +1,7 @@
 describe("ProjectJsParser", function() {
     var _ = require("underscore");
     var ProjectJsParser = require("../lib/parser");
+    var ProjectJsRegistry = require("../lib/registry");
     var parser;
 
     beforeEach(function() {
@@ -8,12 +9,11 @@ describe("ProjectJsParser", function() {
     });
 
     describe("ProjectJsParser.parse", function() {
-
         it("should exist", function() {
             expect(parser.parse).toBeDefined();
             expect(parser.parse).toBeFunction();
         });
-        
+
         it("should return a valid object when given a JSON string", function() {
             var obj = { 
                 "namespace": {},
@@ -28,7 +28,6 @@ describe("ProjectJsParser", function() {
     });
 
     describe("ProjectJsParser.verify", function() {
-
         it("should exist", function() {
             expect(parser.verify).toBeDefined();
             expect(parser.verify).toBeFunction();
@@ -159,6 +158,25 @@ describe("ProjectJsParser", function() {
             }).toThrowAnError();
         });
 
+        it("should throw an error if dependencies is defined but is not a map", function() {
+            expect({
+                'function': parser.verify,
+                'context': parser,
+                'description': "dependencies as array",
+                'parameters': {
+                    "namespace": { 
+                        "base": "some.namespace", 
+                        "map": {},
+                        "dependencies": []
+                    },
+                    "schema": {
+                        "name": "projectjs",
+                        "version": "0.0.1"
+                    }
+                }
+            }).toThrowAnError();
+        });
+
         it("should pass a project spec map when it is valid", function() {
             expect({
                 'function': parser.verify,
@@ -174,6 +192,34 @@ describe("ProjectJsParser", function() {
                     }
                 }
             }).not.toThrowAnError();
+        });
+    });
+
+    describe("ProjectJsParser.createRegistry", function() {
+        it("should exist", function() {
+            expect(parser.createRegistry).toBeDefined();
+            expect(parser.createRegistry).toBeFunction();
+        });
+
+        it("should return a valid ProjectJsRegistry object", function() {
+            var registry = parser.createRegistry({
+                "base": "some.namespace",
+                "map": {},
+                "dependencies": {},
+                "aliases": {}
+            });
+            expect(registry).not.toBeNull();
+            expect(registry.toString()).toBe("[object ProjectJsRegistry]");
+        });
+
+        it("should create listings for packages", function() {
+            var registry = parser.createRegistry({
+                "base": "some.namespace",
+                "map": {
+                    "some.namespace.Class": "./Class"
+                }
+            });
+            expect(registry.resolve("some.namespace.*")).not.toBeNull();
         });
     });
 });
