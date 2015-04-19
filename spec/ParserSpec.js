@@ -26,107 +26,152 @@ describe("ProjectJsParser", function() {
     });
 
     describe("verification behavior", function() {
+        
         it("should have a method named verify", function() {
             expect(parser.verify).toBeDefined();
             expect(parser.verify).toBeFunction();
         });
-        // project namespace 
+
+        // project namespace
+        
         it("should throw an error when namespace attribute is undefined", function() {
-            expect(parser.verify).toThrowWith({
-                'parameters': [
-                    {
-                        "schema": { "name": "projectjs", "version": "^0.0.1" }
-                    }
-                ],
-                'errorType': ReferenceError
-            });
+            expect({
+                'function': parser.verify,
+                'context': parser,
+                'parameters': {
+                    "schema": { "name": "projectjs", "version": "^0.0.1" }
+                }
+            }).toThrowAnErrorOfType(ReferenceError);
         });
+
         it("should throw an error when namespace.base is not defined or empty", function() {
-            expect(parser.verify).toThrowWith({ 
-                'parameters': [
-                    {
-                        "namespace": {
-                            "map": {}
-                        },
-                        "schema": { "name": "projectjs", "version": "^0.0.1" }
-                    }
-                ]
-                'errorType': ReferenceError
-            });
-            expect(parser.verify).toThrowWith({
-                "namespace": {
-                    "base": "",
-                    "map": {}
-                },
-                "schema": { "name": "projectjs", "version": "^0.0.1" }
-            });
+            expect({
+                'function': parser.verify,
+                'context': parser,
+                'parameters': {
+                    "namespace": {
+                        "map": {}
+                    },
+                    "schema": { "name": "projectjs", "version": "^0.0.1" }
+                }
+            }).toThrowAnErrorOfType(ReferenceError);
+
+            expect({
+                'function': parser.verify,
+                'context': parser,
+                'parameters': {
+                    "namespace": {
+                        "base": "",
+                        "map": {}
+                    },
+                    "schema": { "name": "projectjs", "version": "^0.0.1" }
+                }
+            }).toThrowAnError();
         });
+
         it("should throw an error when namespace.map is not defined", function() {
-            expect(parser.verify).toThrowWith({
-                'parameters': [
-                    {
-                        "namespace": {
-                            "base": "some.namespace"
-                        },
-                        "schema": { "name": "projectjs", "version": "^0.0.1" }
-                    }
-                ],
-                'errorType': ReferenceError
-            });
+            expect({
+                'function': parser.verify,
+                'context': parser,
+                'parameters': {
+                    "namespace": {
+                        "base": "some.namespace"
+                    },
+                    "schema": { "name": "projectjs", "version": "^0.0.1" }
+                }
+            }).toThrowAnErrorOfType(ReferenceError);
         });
+
         // project schema
+        
         it("should throw an error when project schema is undefined", function() {
-            expect(parser.verify({
-                "namespace": {
-                    "base": "some.namespace",
-                    "map": {}
+            expect({
+                'function': parser.verify,
+                'context': parser,
+                'parameters': {
+                    "namespace": { "base": "some.namespace", "map": {} }
                 }
-            })).toThrowError(ReferenceError);
+            }).toThrowAnErrorOfType(ReferenceError);
         });
+
         it("should throw an error when project schema name is undefined or does not match", function() {
-            expect(parser.verify({
-                "namespace": {
-                    "base": "some.namespace",
-                    "map": {}
-                },
-                "schema": {
-                    "version": "1.0.0"
+            expect({
+                'function': parser.verify,
+                'context': parser,
+                'parameters': {
+                    "namespace": { "base": "some.namespace", "map": {} },
+                    "schema": {
+                        "version": "1.0.0"
+                    }
                 }
-            })).toThrow();
-            expect(parser.verify({
-                "namespace": { "base": "some.namespace", "map": {} },
-                "schema": {
-                    "name": "someotherschema",
-                    "version": "1.0.0"
+            }).toThrowAnError();
+
+            expect({
+                'function': parser.verify,
+                'context': parser,
+                'parameters': {
+                    "namespace": { "base": "some.namespace", "map": {} },
+                    "schema": {
+                        "name": "",
+                        "version": "1.0.0"
+                    }
                 }
-            })).toThrow();
+            }).toThrowAnError();
+
+            expect({
+                'function': parser.verify,
+                'context': parser,
+                'parameters': {
+                    "namespace": { "base": "some.namespace", "map": {} },
+                    "schema": {
+                        "name": "someotherschema",
+                        "version": "1.0.0"
+                    }
+                }
+            }).toThrowAnError();
         });
+
         it("should throw an error when project schema version is undefined or does not match the current version", function() {
-            expect(parser.verify({
-                "namespace": { "base": "some.namespace", "map": {} },
-                "schema": {
-                    "name": "projectjs"
+            expect({
+                'function': parser.verify,
+                'context': parser,
+                'parameters': {
+                    "namespace": { "base": "some.namespace", "map": {} },
+                    "schema": {
+                        "name": "projectjs"
+                    }
                 }
-            })).toThrow();
-            expect(parser.verify({
-                "namespace": { "base": "some.namespace", "map": {} },
-                "schema": {
-                    "name": "projectjs",
-                    "version": "0.0.0"
+            }).toThrowAnError();
+
+            expect({
+                'description': "non-matching schema version",
+                'function': parser.verify,
+                'context': parser,
+                'parameters': {
+                    "namespace": { "base": "some.namespace", "map": {} },
+                    "schema": {
+                        "name": "projectjs",
+                        "version": "0.0.0"
+                    }
                 }
-            })).toThrow();
+            }).toThrowAnError();
         });
+
         it("should pass a project spec map when it is valid", function() {
-            expect(parser.verify({
-                "namespace": {
-                    "base": "some.namespace",
-                    "map": {}
-                },
-                "schema": {
-                    "name": "projectjs",
-                    "version": "^0.0.1"
+            expect({
+                'function': parser.verify,
+                'context': parser,
+                'parameters': {
+                    "namespace": { 
+                        "base": "some.namespace", 
+                        "map": {} 
+                    },
+                    "schema": {
+                        "name": "projectjs",
+                        "version": "^0.0.1"
+                    }
                 }
-            })).not.toThrow();
+            }).not.toThrowAnError();
         });
     });
 });
