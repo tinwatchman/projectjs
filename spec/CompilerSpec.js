@@ -145,4 +145,27 @@ describe("ProjectJsCompiler", function() {
             expect(path).toEqual("build/src/package/Class.js");
         });
     });
+
+    describe("ProjectJsCompiler.getStartScript", function() {
+        beforeEach(function() {
+            compiler = new ProjectJsCompiler();
+        });
+
+        it("should exist", function() {
+            expect(compiler.getStartScript).toBeDefined();
+        });
+
+        it("should output a script that loads a class, creates an instance, and calls a specific method", function() {
+            var args = {
+                'className': 'some.namespace.SomeClass',
+                'classPath': './SomeClass',
+                'method': 'start'
+            };
+            var output = "var SomeClass = require('./SomeClass');\r\n" +
+                         "var someClass = new SomeClass();\r\n" + 
+                         "someClass.start();";
+            var result = compiler.getStartScript(args.className, args.classPath, args.method, {});
+            expect(result).toEqual(output);
+        });
+    });
 });
