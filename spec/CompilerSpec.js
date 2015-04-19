@@ -145,5 +145,4 @@ describe("ProjectJsCompiler", function() {
             expect(path).toEqual("build/src/package/Class.js");
         });
     });
-    
 });

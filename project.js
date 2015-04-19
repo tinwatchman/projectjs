@@ -20,3 +20,11 @@ var projectRoot = process.cwd() + "/example",
 
 var registry = parser.loadRegistry(projectFile);
 compiler.buildProject(registry, projectRoot, buildDir);
+
+// var ProjectJsFileUtil = require('./lib/file');
+// var fileUtil = new ProjectJsFileUtil();
+// var map = fileUtil.mapDirectory(process.cwd() + "/example", {
+//     'excludePaths': [ process.cwd() + '/example/build', process.cwd() + "/example/libs" ], 
+//     'excludeFiles': [ ".DS_Store", "project.json" ]
+// });
+// console.log(map);
