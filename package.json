@@ -22,7 +22,8 @@
     "version_compare": "0.0.2"
   },
   "devDependencies": {
-    "jasmine": "^2.2.1"
+    "jasmine": "^2.2.1",
+    "node-uuid": "^1.4.3"
   },
   "preferGlobal": true,
   "private": true
