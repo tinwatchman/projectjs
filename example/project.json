@@ -13,6 +13,7 @@
         "aliases": {
         }
     },
+    "output": "./build",
     "start": {
         "class": "projectjs.example.Server",
         "method": "start"

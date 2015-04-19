@@ -6,3 +6,4 @@ example/node_modules/*
 lib/jasmine_examples/*
 spec/jasmine_examples/*
 spec/helpers/jasmine_examples/*
+example/build/*
