@@ -7,11 +7,13 @@ describe("ProjectJsParser", function() {
         parser = new ProjectJsParser();
     });
 
-    describe("parsing behavior", function() {
-        it("should have a method called parse", function() {
+    describe("ProjectJsParser.parse", function() {
+
+        it("should exist", function() {
             expect(parser.parse).toBeDefined();
             expect(parser.parse).toBeFunction();
         });
+        
         it("should return a valid object when given a JSON string", function() {
             var obj = { 
                 "namespace": {},
@@ -25,9 +27,9 @@ describe("ProjectJsParser", function() {
         });
     });
 
-    describe("verification behavior", function() {
-        
-        it("should have a method named verify", function() {
+    describe("ProjectJsParser.verify", function() {
+
+        it("should exist", function() {
             expect(parser.verify).toBeDefined();
             expect(parser.verify).toBeFunction();
         });
