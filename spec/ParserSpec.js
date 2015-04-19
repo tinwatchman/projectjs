@@ -151,7 +151,7 @@ describe("ProjectJsParser", function() {
                     "namespace": { "base": "some.namespace", "map": {} },
                     "schema": {
                         "name": "projectjs",
-                        "version": "0.0.0"
+                        "version": "255.0.0"
                     }
                 }
             }).toThrowAnError();
@@ -168,7 +168,7 @@ describe("ProjectJsParser", function() {
                     },
                     "schema": {
                         "name": "projectjs",
-                        "version": "^0.0.1"
+                        "version": "0.0.1"
                     }
                 }
             }).not.toThrowAnError();
