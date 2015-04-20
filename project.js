@@ -17,6 +17,12 @@ module.exports = (function() {
             };
         };
 
+        var writeProjectFile = function(projectFile, filePath) {
+            var fs = require('fs');
+            var json = projectFile.toJSON();
+            fs.writeFileSync(filePath, json, {'encoding':'utf8'});
+        };
+
         this.getVersion = function() {
             var ownVersion = require('own-version');
             return ownVersion.sync();
@@ -49,8 +55,7 @@ module.exports = (function() {
         };
 
         this.init = function(options) {
-            var fs = require('fs'),
-                path = require('path'),
+            var path = require('path'),
                 ownVersion = require('own-version'),
                 _ = require('underscore'),
                 ProjectJsFile = require('./lib/projectfile');
@@ -78,11 +83,30 @@ module.exports = (function() {
                 project.setBuild('./' + buildDir);
             }
 
-            var filePath = path.join(root, "project.json"),
-                json = project.toJSON();
+            var filePath = path.join(root, "project.json");
+            writeProjectFile(project, filePath);
+            console.log("Project created!");
+        };
+
+        this.createNewClass = function(options) {
+            var _ = require('underscore'),
+                ProjectJsParser = require('./lib/parser'),
+                ProjectJsFactory = require('./lib/factory');
+
+            if (!_.has(options, "name")) {
+                throw new Error("Class name is required!");
+            }
+
+            var root = findProjectRoot(),
+                parser = new ProjectJsParser(),
+                projectFile = parser.loadProjectFile(root.file),
+                factory = new ProjectJsFactory(),
+                classDir = _.has(options, "path") ? options["path"] : process.cwd();
             
-            fs = fs.writeFileSync(filePath, json, {'encoding':'utf8'});
-            console.log("Project created");
+            var classInfo = factory.createNewClass(options.name, classDir, root.dir, projectFile.getBaseNamespace());
+            projectFile.addClass(classInfo.name, classInfo.path);
+            writeProjectFile(projectFile, root.file);
+            console.log("Class %s created!", classInfo.name);
         };
     };
 

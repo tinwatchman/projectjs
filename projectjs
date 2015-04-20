@@ -40,5 +40,24 @@ if (process.argv.length > 2) {
                 });
             }
         });
+
+    // create new class
+    } else if (command === "newclass") {
+        var options = { "path": process.cwd() };
+        if (process.argv.length > 3) {
+            options["name"] = process.argv[3];
+            projectJs.createNewClass(options);
+        } else {
+            var ncInterface = readline.createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+            ncInterface.question("New class name: ", function(nm) {
+                options["name"] = nm;
+                projectJs.createNewClass(options);
+                ncInterface.close();
+            });
+        }
+    
     }
 }

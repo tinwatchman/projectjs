@@ -17,6 +17,7 @@
   "dependencies": {
     "findup-sync": "^0.2.1",
     "fs-extra": "^0.18.2",
+    "mustache": "^2.0.0",
     "own-version": "0.0.2",
     "underscore": "^1.8.3",
     "version_compare": "0.0.2"
