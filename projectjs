@@ -5,6 +5,7 @@
 if (process.argv.length > 2) {
     var command = process.argv[2],
         fs = require('fs'),
+        path = require('path'),
         readline = require('readline'),
         ProjectJs = require('./project'),
         projectJs = new ProjectJs();
@@ -58,6 +59,21 @@ if (process.argv.length > 2) {
                 ncInterface.close();
             });
         }
-    
+
+    // create new directory or package (not that it matters much)
+    } else if (command === "newdir" || command === "newpackage") {
+        if (process.argv.length > 3) {
+            var newPackName = process.argv[3];
+            fs.mkdirSync(newPackName);
+        } else {
+            var ndInterface = readline.createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+            ndInterface.question("New package name: ", function(packName) {
+                fs.mkdirSync(packName);
+                ncInterface.close();
+            });
+        }
     }
 }
