@@ -2,6 +2,20 @@
 
 'use strict';
 
-var findup = require('findup-sync');
-var path = findup("project.json");
-console.log(process.argv);
+if (process.argv.length > 2) {
+    var command = process.argv[2],
+        ProjectJs = require('./project'),
+        projectJs = new ProjectJs();
+
+    if (command === "version" || command === "--version" || 
+        command === "--v" || command === "-v") {
+        console.log(projectJs.getVersion());
+
+    } else if (command === "build") {
+        projectJs.buildProject();
+    }
+}
+
+// var findup = require('findup-sync');
+// var path = findup("project.json");
+// console.log(process.argv);

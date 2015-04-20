@@ -13,11 +13,11 @@
         "aliases": {
         }
     },
-    "buildDir": "./build",
+    "build": "./build",
     "start": {
         "class": "projectjs.example.Server",
         "method": "start",
-        "buildScript": "./start.js"
+        "output": "./start.js"
     },
     "schema": {
         "name": "projectjs",
