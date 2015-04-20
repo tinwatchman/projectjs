@@ -35,52 +35,51 @@ module.exports = (function() {
             var root = findProjectRoot(),
                 parser = new ProjectJsParser(),
                 projectFile = parser.loadProjectFile(root.file),
-                registry = parser.createRegistry(projectFile.getNamespace());
-
-            // determine build directory, if we can
-            var buildDir = null;
-            if (projectFile.hasBuild()) {
-                buildDir = projectFile.getBuild();
-            }
-
-            // determine start info
-            var startInfo = null;
-            if (projectFile.hasStart()) {
-                startInfo = projectFile.getStart();
-            }
+                registry = parser.createRegistry(projectFile);
 
             var compiler = new ProjectJsCompiler();
-            compiler.buildProject(registry, root.dir, buildDir, startInfo);
+            compiler.buildProject(projectFile, registry);
             console.log("build complete");
         };
 
         this.init = function(options) {
-            var path = require('path'),
+            var fs = require('fs-extra'),
+                path = require('path'),
                 ownVersion = require('own-version'),
                 _ = require('underscore'),
                 ProjectJsFile = require('./lib/projectfile');
 
             var root = _.has(options, "root") ? options['root'] : process.cwd(),
                 baseNs = _.has(options, 'namespace') ? options['namespace'] : "project",
+                srcDir = _.has(options, 'src') ? options['src'] : null,
                 buildDir = _.has(options, 'build') ? options['build'] : null,
                 currentVersion = ownVersion.sync();
 
             var project = new ProjectJsFile({
-                "namespace": {
-                    "base": baseNs,
-                    "map": {},
-                    "dependencies": {},
-                    "aliases": {}
+                "data": {
+                    "namespace": {
+                        "base": baseNs,
+                        "map": {},
+                        "dependencies": {},
+                        "aliases": {}
+                    },
+                    "srcDir": "",
+                    "buildDir": "",
+                    "start": "",
+                    "schema": {
+                        "name": "projectjs",
+                        "version": currentVersion
+                    }
                 },
-                "build": "",
-                "start": "",
-                "schema": {
-                    "name": "projectjs",
-                    "version": currentVersion
-                }
+                "rootDir": root
             });
+            if (srcDir !== null) {
+                project.setSrcDir('./' + srcDir);
+                fs.ensureDirSync(path.join(root, srcDir));
+            }
             if (buildDir !== null) {
-                project.setBuild('./' + buildDir);
+                project.setBuildDir('./' + buildDir);
+                fs.ensureDirSync(path.join(root, buildDir));
             }
 
             var filePath = path.join(root, "project.json");
@@ -103,7 +102,7 @@ module.exports = (function() {
                 factory = new ProjectJsFactory(),
                 classDir = _.has(options, "path") ? options["path"] : process.cwd();
             
-            var classInfo = factory.createNewClass(options.name, classDir, root.dir, projectFile.getBaseNamespace());
+            var classInfo = factory.createNewClass(options.name, classDir, projectFile);
             projectFile.addClass(classInfo.name, classInfo.path);
             writeProjectFile(projectFile, root.file);
             console.log("Class %s created!", classInfo.name);

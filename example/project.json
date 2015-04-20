@@ -2,10 +2,10 @@
     "namespace": {
         "base": "projectjs.example",
         "map": {
-            "projectjs.example.Server": "./src/Server",
-            "projectjs.example.config.Config": "./src/config/Config",
-            "projectjs.example.data.Message": "./src/data/Message",
-            "projectjs.example.data.User": "./src/data/User"
+            "projectjs.example.Server": "./Server",
+            "projectjs.example.config.Config": "./config/Config",
+            "projectjs.example.data.Message": "./data/Message",
+            "projectjs.example.data.User": "./data/User"
         },
         "dependencies": {
             "underscore": "./libs/underscore.min"
@@ -13,7 +13,8 @@
         "aliases": {
         }
     },
-    "build": "./build",
+    "srcDir": "./src",
+    "buildDir": "./build",
     "start": {
         "class": "projectjs.example.Server",
         "method": "start",

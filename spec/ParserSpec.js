@@ -203,23 +203,43 @@ describe("ProjectJsParser", function() {
 
         it("should return a valid ProjectJsRegistry object", function() {
             var registry = parser.createRegistry({
-                "base": "some.namespace",
-                "map": {},
-                "dependencies": {},
-                "aliases": {}
-            });
+                "namespace": {
+                    "base": "some.namespace",
+                    "map": {},
+                    "dependencies": {},
+                    "aliases": {}
+                }
+            }, {});
             expect(registry).not.toBeNull();
             expect(registry.toString()).toBe("[object ProjectJsRegistry]");
         });
 
         it("should create listings for packages", function() {
             var registry = parser.createRegistry({
-                "base": "some.namespace",
-                "map": {
-                    "some.namespace.Class": "./Class"
+                "namespace": {
+                    "base": "some.namespace",
+                    "map": {
+                        "some.namespace.Class": "./Class"
+                    }
                 }
-            });
+            }, {});
             expect(registry.resolve("some.namespace.*")).not.toBeNull();
         });
+
+        it("should support source directory options", function() {
+            var registry = parser.createRegistry({
+                "namespace": {
+                    "base": "some.namespace",
+                    "map": {
+                        "some.namespace.Class": "./Class"
+                    }
+                },
+                "srcDir": "./src"
+            }, {
+                "addSrcDir": true
+            });
+            expect(registry.isAddingSrcDir()).toBe(true);
+            expect(registry.resolve("some.namespace.Class")).toEqual("./src/Class");
+        })
     });
 });

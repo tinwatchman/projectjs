@@ -29,4 +29,10 @@ describe("ProjectJsUtil", function() {
         expect(util.hasJsFileExtension("/Users/someone/some/file/path")).toEqual(false);
     });
 
+    describe("getAbsoluteFilePath", function() {
+        it("should produce an absolute path", function() {
+            var r = util.getAbsoluteFilePath("./package/Class", "/Users/someone/project/build");
+            expect(r).toEqual("/Users/someone/project/build/package/Class.js");
+        });
+    });
 });

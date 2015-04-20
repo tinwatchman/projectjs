@@ -32,13 +32,16 @@ if (process.argv.length > 2) {
                 console.log("Base namespace is required");
             } else {
                 options["namespace"] = baseNs;
-                initInterface.question("[OPTIONAL] Name a build directory? ", function(buildDir) {
-                    if (buildDir !== null && buildDir !== "" && buildDir.length > 0) {
-                        options["build"] = buildDir;
-                    }
-                    projectJs.init(options);
-                    initInterface.close();
-                });
+                initInterface.question("[OPTIONAL] Name a src folder? ", function(srcDir) {
+                    options["src"] = srcDir;
+                    initInterface.question("[OPTIONAL] Name a build folder? ", function(buildDir) {
+                        if (buildDir !== null && buildDir !== "" && buildDir.length > 0) {
+                            options["build"] = buildDir;
+                        }
+                        projectJs.init(options);
+                        initInterface.close();
+                    });
+                })
             }
         });
 

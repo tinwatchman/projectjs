@@ -5,22 +5,24 @@ describe("ProjectJsRegistry", function() {
     describe("ProjectJsRegistry.resolve", function() {
         beforeEach(function() {
             registry = new ProjectJsRegistry({
-                "base": "some.namespace",
-                "map": {
-                    "some.namespace.package.SomeClass": "./package/SomeClass",
-                    "some.namespace.package.SomeOtherClass": "./package/SomeOtherClass",
-                    "some.namespace.package.*": [
-                        "some.namespace.package.SomeClass",
-                        "some.namespace.package.SomeOtherClass"
-                    ]
-                },
-                "dependencies": {
-                    "dependency": "./lib/dependency"
-                },
-                "aliases": {
-                    "SomeClass": "some.namespace.package.SomeClass",
-                    "SomeOtherClass": "some.namespace.package.SomeOtherClass",
-                    "SomePackage": "some.namespace.package.*"
+                "namespace": {
+                    "base": "some.namespace",
+                    "map": {
+                        "some.namespace.package.SomeClass": "./package/SomeClass",
+                        "some.namespace.package.SomeOtherClass": "./package/SomeOtherClass",
+                        "some.namespace.package.*": [
+                            "some.namespace.package.SomeClass",
+                            "some.namespace.package.SomeOtherClass"
+                        ]
+                    },
+                    "dependencies": {
+                        "dependency": "./lib/dependency"
+                    },
+                    "aliases": {
+                        "SomeClass": "some.namespace.package.SomeClass",
+                        "SomeOtherClass": "some.namespace.package.SomeOtherClass",
+                        "SomePackage": "some.namespace.package.*"
+                    }
                 }
             });
         });
@@ -74,20 +76,23 @@ describe("ProjectJsRegistry", function() {
     describe("ProjectJsRegistry compiled suffix", function() {
         beforeEach(function() {
             registry = new ProjectJsRegistry({
-                "base": "some.namespace",
-                "map": {
-                    "some.namespace.package.SomeClass": "./package/SomeClass",
-                    "some.namespace.package.*": [
-                        "some.namespace.package.SomeClass"
-                    ]
+                "namespace": {
+                    "base": "some.namespace",
+                    "map": {
+                        "some.namespace.package.SomeClass": "./package/SomeClass",
+                        "some.namespace.package.*": [
+                            "some.namespace.package.SomeClass"
+                        ]
+                    },
+                    "dependencies": {
+                        "dependency": "./lib/dependency/main"
+                    },
+                    "aliases": {
+                        "SomeClass": "some.namespace.package.SomeClass"
+                    }
                 },
-                "dependencies": {
-                    "dependency": "./lib/dependency/main"
-                },
-                "aliases": {
-                    "SomeClass": "some.namespace.package.SomeClass"
-                },
-                "useCompileSuffix": true
+                "compileSuffix": ".tmp",
+                "addCompileSuffix": true
             });
         });
 
@@ -110,10 +115,54 @@ describe("ProjectJsRegistry", function() {
             expect(registry.resolve("dependency")).toEqual("./lib/dependency/main");
         });
 
-        it("should be accessible and settable via useCompileSuffix", function() {
-            expect(registry.useCompileSuffix()).toBe(true);
-            registry.useCompileSuffix(false);
-            expect(registry.useCompileSuffix()).toBe(false);
+        it("should be accessible and settable via isAddingCompileSuffix", function() {
+            expect(registry.isAddingCompileSuffix).toBeDefined();
+            expect(registry.isAddingCompileSuffix()).toBe(true);
+            registry.isAddingCompileSuffix(false);
+            expect(registry.isAddingCompileSuffix()).toBe(false);
+        });
+    });
+
+    describe("ProjectJsRegistry source directory support", function() {
+        beforeEach(function() {
+            registry = new ProjectJsRegistry({
+                "namespace": {
+                    "base": "some.namespace",
+                    "map": {
+                        "some.namespace.package.SomeClass": "./package/SomeClass",
+                        "some.namespace.package.*": [
+                            "some.namespace.package.SomeClass"
+                        ]
+                    },
+                    "dependencies": {
+                        "dependency": "./lib/dependency"
+                    },
+                    "aliases": {
+                        "SomeClass": "some.namespace.package.SomeClass"
+                    }
+                },
+                "srcDir": "./src",
+                "addSrcDir": true
+            });
+        });
+
+        it("should be included in class file paths", function() {
+            expect(registry.resolve("SomeClass")).toEqual("./src/package/SomeClass");
+        });
+
+        it("should be added to the end of package file paths", function() {
+            var result = registry.resolve("package.*");
+            expect(result).toBeObject();
+            expect(result).toHaveLength(1);
+            expect(result["SomeClass"]).toEqual("./src/package/SomeClass");
+        });
+
+        it("should be accessible and settable via isAddingSrcDir", function() {
+            expect(registry.isAddingSrcDir).toBeDefined();
+            expect(registry.isAddingSrcDir()).toBe(true);
+            registry.isAddingSrcDir(false);
+            expect(registry.isAddingSrcDir()).toBe(false);
+            expect(registry.resolve("SomeClass")).toEqual("./package/SomeClass");
         });
     });
 });

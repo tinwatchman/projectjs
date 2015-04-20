@@ -103,19 +103,18 @@ describe("ProjectJsCompiler", function() {
         beforeEach(function() {
             compiler = new ProjectJsCompiler();
             registry = new ProjectJsRegistry({
-                "base": "some.namespace",
-                "map": {
-                    "some.namespace.Class": "./Class",
-                    "some.namespace.OtherClass": "./OtherClass",
-                    "some.namespace.*": [
-                        "some.namespace.Class",
-                        "some.namespace.OtherClass"
-                    ]
+                "namespace": {
+                    "base": "some.namespace",
+                    "map": {
+                        "some.namespace.Class": "./Class",
+                        "some.namespace.OtherClass": "./OtherClass",
+                        "some.namespace.*": [
+                            "some.namespace.Class",
+                            "some.namespace.OtherClass"
+                        ]
+                    }
                 },
-                "schema": {
-                    "name": "projectjs",
-                    "version": "0.0.1"
-                }
+                "srcDir": "./src"
             });
         });
 
@@ -133,53 +132,11 @@ describe("ProjectJsCompiler", function() {
             var result = compiler.replaceUses('.', code, registry);
             expect(result).toEqual("var myPackage = { 'Class': require('./Class'), 'OtherClass': require('./OtherClass') };");
         });
-    });
 
-    describe("ProjectJsCompiler.getBuildFilePath", function() {
-        beforeEach(function() {
-            compiler = new ProjectJsCompiler();
-        });
-
-        it("should produce a valid file name", function() {
-            var path = compiler.getBuildFilePath("./src/package/Class", "./build");
-            expect(path).toEqual("build/src/package/Class.js");
-        });
-    });
-
-    describe("ProjectJsCompiler.getStartScript", function() {
-        beforeEach(function() {
-            compiler = new ProjectJsCompiler();
-        });
-
-        it("should exist", function() {
-            expect(compiler.getStartScript).toBeDefined();
-        });
-
-        it("should output a script that loads a class, creates an instance, and calls a specific method", function() {
-            var args = {
-                'className': 'some.namespace.SomeClass',
-                'classPath': './SomeClass',
-                'method': 'start'
-            };
-            var output = "var SomeClass = require('./SomeClass');\r\n" +
-                         "var someClass = new SomeClass();\r\n" + 
-                         "someClass.start();";
-            var result = compiler.getStartScript(args.className, args.classPath, args.method, {});
-            expect(result).toEqual(output);
-        });
-
-        it("should support start method arguments", function() {
-            var className = 'some.namespace.SomeClass',
-                classPath = './SomeClass',
-                method = 'start',
-                opts = {
-                    'arguments': [ 2, 5, "go" ]
-                };
-            var output = "var SomeClass = require('./SomeClass');\r\n" +
-                         "var someClass = new SomeClass();\r\n" + 
-                         "someClass.start(2, 5, 'go');";
-            var result = compiler.getStartScript(className, classPath, method, opts);
-            expect(result).toEqual(output);
+        it("should ignore src folder settings", function() {
+            var code = "var myClass = use('some.namespace.Class');";
+            registry.isAddingSrcDir(true);
+            expect(compiler.replaceUses('.', code, registry)).not.toEqual("var myClass = require('./src/Class');");
         });
     });
 });
