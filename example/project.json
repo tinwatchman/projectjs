@@ -17,7 +17,7 @@
     "start": {
         "class": "projectjs.example.Server",
         "method": "start",
-        "main": "./start.js"
+        "buildScript": "./start.js"
     },
     "schema": {
         "name": "projectjs",

@@ -167,5 +167,19 @@ describe("ProjectJsCompiler", function() {
             var result = compiler.getStartScript(args.className, args.classPath, args.method, {});
             expect(result).toEqual(output);
         });
+
+        it("should support start method arguments", function() {
+            var className = 'some.namespace.SomeClass',
+                classPath = './SomeClass',
+                method = 'start',
+                opts = {
+                    'methodArguments': [ 2, 5, "go" ]
+                };
+            var output = "var SomeClass = require('./SomeClass');\r\n" +
+                         "var someClass = new SomeClass();\r\n" + 
+                         "someClass.start(2, 5, 'go');";
+            var result = compiler.getStartScript(className, classPath, method, opts);
+            expect(result).toEqual(output);
+        });
     });
 });

@@ -19,7 +19,8 @@ var projectRoot = process.cwd() + "/example",
     buildDir = "./build";
 
 var registry = parser.loadRegistry(projectFile);
-compiler.buildProject(registry, projectRoot, buildDir);
+var projectInfo = require(projectFile);
+compiler.buildProject(registry, projectRoot, buildDir, projectInfo.start);
 
 // var ProjectJsFileUtil = require('./lib/file');
 // var fileUtil = new ProjectJsFileUtil();
