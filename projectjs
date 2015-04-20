@@ -4,18 +4,41 @@
 
 if (process.argv.length > 2) {
     var command = process.argv[2],
+        fs = require('fs'),
+        readline = require('readline'),
         ProjectJs = require('./project'),
         projectJs = new ProjectJs();
 
+    // version command
     if (command === "version" || command === "--version" || 
         command === "--v" || command === "-v") {
         console.log(projectJs.getVersion());
 
+    // build command
     } else if (command === "build") {
         projectJs.buildProject();
+
+    // init command
+    } else if (command === "init") {
+        var initInterface = readline.createInterface({
+                input: process.stdin,
+                output: process.stdout
+            }),
+            options = { "root": process.cwd() };
+
+        initInterface.question("Base namespace for this project: ", function(baseNs) {
+            if (baseNs === null || baseNs === "" || baseNs.length === 0) {
+                console.log("Base namespace is required");
+            } else {
+                options["namespace"] = baseNs;
+                initInterface.question("[OPTIONAL] Name a build directory? ", function(buildDir) {
+                    if (buildDir !== null && buildDir !== "" && buildDir.length > 0) {
+                        options["build"] = buildDir;
+                    }
+                    projectJs.init(options);
+                    initInterface.close();
+                });
+            }
+        });
     }
 }
-
-// var findup = require('findup-sync');
-// var path = findup("project.json");
-// console.log(process.argv);

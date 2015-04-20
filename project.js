@@ -47,38 +47,46 @@ module.exports = (function() {
             compiler.buildProject(registry, root.dir, buildDir, startInfo);
             console.log("build complete");
         };
+
+        this.init = function(options) {
+            var fs = require('fs'),
+                path = require('path'),
+                ownVersion = require('own-version'),
+                _ = require('underscore'),
+                ProjectJsFile = require('./lib/projectfile');
+
+            var root = _.has(options, "root") ? options['root'] : process.cwd(),
+                baseNs = _.has(options, 'namespace') ? options['namespace'] : "project",
+                buildDir = _.has(options, 'build') ? options['build'] : null,
+                currentVersion = ownVersion.sync();
+
+            var project = new ProjectJsFile({
+                "namespace": {
+                    "base": baseNs,
+                    "map": {},
+                    "dependencies": {},
+                    "aliases": {}
+                },
+                "build": "",
+                "start": "",
+                "schema": {
+                    "name": "projectjs",
+                    "version": currentVersion
+                }
+            });
+            if (buildDir !== null) {
+                project.setBuild('./' + buildDir);
+            }
+
+            var filePath = path.join(root, "project.json"),
+                json = project.toJSON();
+            
+            fs = fs.writeFileSync(filePath, json, {'encoding':'utf8'});
+            console.log("Project created");
+        };
     };
 
     return ProjectJs;
 
 })();
-/*
-var ProjectRunner = require('./lib/runner');
 
-var runner = new ProjectRunner();
-
-var path = process.cwd() + "/example/";
-
-runner.loadAndRun(path);
-*/
-
-// var ProjectJsCompiler = require('./lib/compiler');
-// var ProjectJsParser = require('./lib/parser');
-// var compiler = new ProjectJsCompiler();
-// var parser = new ProjectJsParser();
-
-// var projectRoot = process.cwd() + "/example",
-//     projectFile = projectRoot + "/project.json",
-//     buildDir = "./build";
-
-// var registry = parser.loadRegistry(projectFile);
-// var projectInfo = require(projectFile);
-// compiler.buildProject(registry, projectRoot, buildDir, projectInfo.start);
-
-// var ProjectJsFileUtil = require('./lib/file');
-// var fileUtil = new ProjectJsFileUtil();
-// var map = fileUtil.mapDirectory(process.cwd() + "/example", {
-//     'excludePaths': [ process.cwd() + '/example/build', process.cwd() + "/example/libs" ], 
-//     'excludeFiles': [ ".DS_Store", "project.json" ]
-// });
-// console.log(map);
