@@ -1,8 +1,6 @@
 # project.js
 > Bringing Javaish project structure and organization to civilize your Node apps
 
-=======
-
 Tired of hunting down where you put a class inside of a set of endless .js files? Drained by figuring out relative paths for your require statements? On the verge of despair from writing the same boilerplate code over and over again? Do you -- in short -- find yourself missing the more structured development environment provided by other languages, where each class has its own file and namespaces make imports a breeze?
 
 Enter **Project.js**. Project.js is a simple collection of command-line tools intended to make Node development both easier and more organized. It works by placing a *project.json* file at the root of your project's directory, which tracks your .js files and maps them to a set of namespaced strings, similar to how languages like Java and Visual C# organize their classes. When you're finished developing, just type in `projectjs build` to your terminal. Your project will be automatically compiled with all import statements subbed out for standard Node requires.
