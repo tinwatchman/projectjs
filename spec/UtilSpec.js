@@ -2,7 +2,7 @@
 /// Jasmine Test Spec for ProjectJsUtil functions //
 ////////////////////////////////////////////////////
 
-describe("ProjectUtil", function() {
+describe("ProjectJsUtil", function() {
     var util = require("../lib/util");
 
     it("needs to be able to tell what is, and is not, a request string for a package", function() {
