@@ -1,0 +1,7 @@
+example/*
+*.sublime-project
+*.sublime-workspace
+*.DS_Store
+lib/jasmine_examples/*
+spec/jasmine_examples/*
+spec/helpers/jasmine_examples/*
