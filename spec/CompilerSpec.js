@@ -125,12 +125,12 @@ describe("ProjectJsCompiler", function() {
 
         it("should replace a use invocation within a code block with a standard require", function() {
             var code = "var myClass = use('some.namespace.Class');";
-            expect(compiler.replaceUses(code, registry)).toEqual("var myClass = require('./Class');");
+            expect(compiler.replaceUses('.', code, registry)).toEqual("var myClass = require('./Class');");
         });
 
         it("should replace a use package request with a package map", function() {
             var code = "var myPackage = use('some.namespace.*');";
-            var result = compiler.replaceUses(code, registry);
+            var result = compiler.replaceUses('.', code, registry);
             expect(result).toEqual("var myPackage = { 'Class': require('./Class'), 'OtherClass': require('./OtherClass') };");
         });
     });
