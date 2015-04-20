@@ -5,11 +5,15 @@
   "scripts": {
     "test": "jasmine"
   },
-  "main": "projectjs",
+  "bin": {
+    "projectjs": "bin/projectjs"
+  },
   "keywords": [
     "project",
     "structure",
     "namespace",
+    "scaffold",
+    "scaffolding",
     "submodule",
     "organization",
     "build",

@@ -16,6 +16,12 @@ Enter **Project.js**. Project.js is a simple collection of command-line tools in
 * Compiler wraps classes in boilerplate code so you don't have to
 * More details soon!
 
+## To Do List
+
+* Documentation
+* Convert bin file to use commander or similar package 
+* More test coverage
+
 ## Documentation
 
 ... is coming. I promise.

@@ -7,7 +7,7 @@ if (process.argv.length > 2) {
         fs = require('fs'),
         path = require('path'),
         readline = require('readline'),
-        ProjectJs = require('./project'),
+        ProjectJs = require('../project'),
         projectJs = new ProjectJs();
 
     // version command
