@@ -173,7 +173,7 @@ describe("ProjectJsCompiler", function() {
                 classPath = './SomeClass',
                 method = 'start',
                 opts = {
-                    'methodArguments': [ 2, 5, "go" ]
+                    'arguments': [ 2, 5, "go" ]
                 };
             var output = "var SomeClass = require('./SomeClass');\r\n" +
                          "var someClass = new SomeClass();\r\n" + 
