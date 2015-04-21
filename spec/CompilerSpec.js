@@ -120,6 +120,7 @@ describe("ProjectJsCompiler", function() {
 
         it("should exist", function() {
             expect(compiler.replaceUses).toBeDefined();
+            expect(compiler.replaceUses).toBeFunction();
         });
 
         it("should replace a use invocation within a code block with a standard require", function() {

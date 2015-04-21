@@ -35,4 +35,11 @@ describe("ProjectJsUtil", function() {
             expect(r).toEqual("/Users/someone/project/build/package/Class.js");
         });
     });
+
+    describe("convertBackSlashes", function() {
+        it("should convert all backslashes to forward slashes", function() {
+            var r = util.convertBackSlashes("\\Users\\someone\\something\\project\\src");
+            expect(r).toEqual("/Users/someone/something/project/src");
+        });
+    });
 });
