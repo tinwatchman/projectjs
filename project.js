@@ -28,26 +28,13 @@ module.exports = (function() {
             return ownVersion.sync();
         };
 
-        this.buildProject = function() {
-            var ProjectJsParser = require('./lib/parser')
-                ProjectJsCompiler = require('./lib/compiler');
-
-            var root = findProjectRoot(),
-                parser = new ProjectJsParser(),
-                projectFile = parser.loadProjectFile(root.file),
-                registry = parser.createRegistry(projectFile);
-
-            var compiler = new ProjectJsCompiler();
-            compiler.buildProject(projectFile, registry);
-            console.log("build complete");
-        };
-
         this.init = function(options) {
             var fs = require('fs-extra'),
                 path = require('path'),
                 ownVersion = require('own-version'),
                 _ = require('underscore'),
-                ProjectJsFile = require('./lib/projectfile');
+                ProjectJsFile = require('./lib/projectfile'),
+                util = require('./lib/util');
 
             var root = _.has(options, "root") ? options['root'] : process.cwd(),
                 baseNs = _.has(options, 'namespace') ? options['namespace'] : "project",
@@ -74,11 +61,11 @@ module.exports = (function() {
                 "rootDir": root
             });
             if (srcDir !== null) {
-                project.setSrcDir('./' + srcDir);
+                project.setSrcDir('./' + util.convertBackSlashes(srcDir));
                 fs.ensureDirSync(path.join(root, srcDir));
             }
             if (buildDir !== null) {
-                project.setBuildDir('./' + buildDir);
+                project.setBuildDir('./' + util.convertBackSlashes(buildDir));
                 fs.ensureDirSync(path.join(root, buildDir));
             }
 
@@ -106,6 +93,75 @@ module.exports = (function() {
             projectFile.addClass(classInfo.name, classInfo.path);
             writeProjectFile(projectFile, root.file);
             console.log("Class %s created!", classInfo.name);
+        };
+
+        this.addDependency = function(options) {
+            var ProjectJsParser = require('./lib/parser'),
+                _ = require('underscore');
+
+            if (!_.has(options, "name") || _.isEmpty(options['name'])) {
+                throw new Error("Dependency name is required!");
+            } else if (!_.has(options, "path") || _.isEmpty(options['path'])) {
+                throw new Error("Dependency path is required!");
+            }
+
+            var root = findProjectRoot(),
+                parser = new ProjectJsParser(),
+                projectFile = parser.loadProjectFile(root.file);
+
+            // TODO: check to make sure dependency exists
+            
+            projectFile.addDependency(options['name'], options['path']);
+            writeProjectFile(projectFile, root.file);
+            console.log("Dependency %s added", options['name']);
+        };
+
+        this.addAlias = function(options) {
+            var ProjectJsParser = require('./lib/parser'),
+                _ = require('underscore');
+
+            if (!_.has(options, "alias") || _.isEmpty(options['alias'])) {
+                throw new Error("Alias is required!");
+            } else if (!_.has(options, "class") || _.isEmpty(options['class'])) {
+                throw new Error("Class is required!");
+            }
+
+            var root = findProjectRoot(),
+                parser = new ProjectJsParser(),
+                projectFile = parser.loadProjectFile(root.file);
+
+            // TODO: check to make sure class path exists / resolve classes relative to cwd
+            
+            projectFile.addAlias(options['alias'], options['class']);
+            writeProjectFile(projectFile, root.file);
+            console.log("Alias added");
+        };
+
+        this.build = function() {
+            var ProjectJsParser = require('./lib/parser'),
+                ProjectJsCompiler = require('./lib/compiler');
+
+            var root = findProjectRoot(),
+                parser = new ProjectJsParser(),
+                projectFile = parser.loadProjectFile(root.file),
+                registry = parser.createRegistry(projectFile);
+
+            var compiler = new ProjectJsCompiler();
+            compiler.buildProject(projectFile, registry);
+            console.log("build complete");
+        };
+
+        this.run = function() {
+            var ProjectJsParser = require('./lib/parser'),
+                ProjectJsRunner = require('./lib/runner');
+
+            var root = findProjectRoot(),
+                parser = new ProjectJsParser(),
+                projectFile = parser.loadProjectFile(root.file),
+                registry = parser.createRegistry(projectFile);
+
+            var runner = new ProjectJsRunner();
+            runner.run(projectFile, registry);
         };
     };
 

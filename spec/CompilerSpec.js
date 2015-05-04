@@ -4,7 +4,7 @@ describe("ProjectJsCompiler", function() {
     var ProjectJsRegistry = require("../lib/registry");
     var compiler;
 
-    describe("ProjectJsCompiler.addClassBoilerplate", function() {
+    describe("addClassBoilerplate", function() {
         var use;
 
         beforeEach(function() {
@@ -97,7 +97,7 @@ describe("ProjectJsCompiler", function() {
         });
     });
 
-    describe("ProjectJsCompiler.replaceUses", function() {
+    describe("replaceUses", function() {
         var registry;
 
         beforeEach(function() {
@@ -138,6 +138,26 @@ describe("ProjectJsCompiler", function() {
             var code = "var myClass = use('some.namespace.Class');";
             registry.isAddingSrcDir(true);
             expect(compiler.replaceUses('.', code, registry)).not.toEqual("var myClass = require('./src/Class');");
+        });
+    });
+
+    describe("getRelativeCodePath", function() {
+        beforeEach(function() {
+            compiler = new ProjectJsCompiler();
+        });
+
+        it("should return a relative path from one file to another", function() {
+            var fromFile = "/Users/someuser/someproject/somedir/file1.js",
+                toFile = "/Users/someuser/someproject/anotherdir/file2",
+                r = compiler.getRelativeCodePath(fromFile, toFile);
+            expect(r).toEqual("../anotherdir/file2");
+        });
+
+        it("should return the path Unix-style, even on Windows", function() {
+            var fromFile = "C:\\Users\\someuser\\someproject\\somedir\\file1",
+                toFile = "C:\\Users\\someuser\\someproject\\anotherdir\\subdir\\file2",
+                r = compiler.getRelativeCodePath(fromFile, toFile);
+            expect(r).toEqual("../anotherdir/subdir/file2");
         });
     });
 });

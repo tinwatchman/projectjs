@@ -17,7 +17,7 @@ if (process.argv.length > 2) {
 
     // build command
     } else if (command === "build") {
-        projectJs.buildProject();
+        projectJs.build();
 
     // init command
     } else if (command === "init") {
