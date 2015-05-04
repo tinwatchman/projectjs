@@ -102,7 +102,7 @@ module.exports = (function() {
             if (!_.has(options, "name") || _.isEmpty(options['name'])) {
                 throw new Error("Dependency name is required!");
             } else if (!_.has(options, "path") || _.isEmpty(options['path'])) {
-                throw new Error("Dependency path is required!");
+                throw new Error("Path to dependency is required!");
             }
 
             var root = findProjectRoot(),
@@ -161,7 +161,7 @@ module.exports = (function() {
                 registry = parser.createRegistry(projectFile);
 
             var runner = new ProjectJsRunner();
-            runner.run(projectFile, registry);
+            runner.run(root.dir, projectFile, registry);
         };
     };
 

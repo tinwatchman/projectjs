@@ -2,81 +2,205 @@
 
 'use strict';
 
-if (process.argv.length > 2) {
-    var command = process.argv[2],
-        fs = require('fs'),
-        path = require('path'),
-        readline = require('readline'),
-        ProjectJs = require('../project'),
-        projectJs = new ProjectJs();
+var fs = require('fs'),
+    sc = require('subcommander'),
+    readlineSync = require('readline-sync'),
+    _ = require('underscore'),
+    ProjectJs = require('../project'),
+    projectJs = new ProjectJs();
 
-    // version command
-    if (command === "version" || command === "--version" || 
-        command === "--v" || command === "-v") {
+sc.scriptName("projectjs");
+
+// version command
+sc.command('version', {
+    desc: 'Displays ProjectJs version',
+    callback: function() {
         console.log(projectJs.getVersion());
-
-    // build command
-    } else if (command === "build") {
-        projectJs.build();
-
-    // init command
-    } else if (command === "init") {
-        var initInterface = readline.createInterface({
-                input: process.stdin,
-                output: process.stdout
-            }),
-            options = { "root": process.cwd() };
-
-        initInterface.question("Base namespace for this project: ", function(baseNs) {
-            if (baseNs === null || baseNs === "" || baseNs.length === 0) {
-                console.log("Base namespace is required");
-            } else {
-                options["namespace"] = baseNs;
-                initInterface.question("[OPTIONAL] Name a src folder? ", function(srcDir) {
-                    options["src"] = srcDir;
-                    initInterface.question("[OPTIONAL] Name a build folder? ", function(buildDir) {
-                        if (buildDir !== null && buildDir !== "" && buildDir.length > 0) {
-                            options["build"] = buildDir;
-                        }
-                        projectJs.init(options);
-                        initInterface.close();
-                    });
-                })
-            }
-        });
-
-    // create new class
-    } else if (command === "newclass") {
-        var options = { "path": process.cwd() };
-        if (process.argv.length > 3) {
-            options["name"] = process.argv[3];
-            projectJs.createNewClass(options);
-        } else {
-            var ncInterface = readline.createInterface({
-                input: process.stdin,
-                output: process.stdout
-            });
-            ncInterface.question("New class name: ", function(nm) {
-                options["name"] = nm;
-                projectJs.createNewClass(options);
-                ncInterface.close();
-            });
-        }
-
-    // create new directory or package (not that it matters much)
-    } else if (command === "newdir" || command === "newpackage") {
-        if (process.argv.length > 3) {
-            var newPackName = process.argv[3];
-            fs.mkdirSync(newPackName);
-        } else {
-            var ndInterface = readline.createInterface({
-                input: process.stdin,
-                output: process.stdout
-            });
-            ndInterface.question("New package name: ", function(packName) {
-                fs.mkdirSync(packName);
-                ncInterface.close();
-            });
-        }
     }
-}
+});
+
+// init command
+sc.command('init', {
+    desc: "Initializes a new ProjectJs project",
+    callback: function(options) {
+        if (!_.has(options, "namespace")) {
+            var ns = readlineSync.question("Base namespace for this project : ");
+            if (_.isUndefined(ns) || _.isNull(ns) || _.isEmpty(ns)) {
+                console.error("Base namespace is required");
+                return;
+            }
+            options["namespace"] = ns;
+        }
+        if (!_.has(options, "src")) {
+            var src = readlineSync.question("Name a source folder for this project? (Optional; leave blank for none) : ", {
+                defaultInput: "src"
+            });
+            if (!_.isUndefined(src) && !_.isNull(src) && !_.isEmpty(src)) {
+                options["src"] = src;
+            }
+        }
+        if (!_.has(options, "build")) {
+            var build = readlineSync.question("Name a build folder for this project? (Optional; leave blank for none) : ", {
+                defaultInput: "build"
+            });
+            if (!_.isUndefined(build) && !_.isNull(build) && !_.isEmpty(build)) {
+                options["build"] = build;
+            }
+        }
+
+        projectJs.init(options);
+    }
+}).option('namespace', {
+    abbr: 'ns',
+    desc: "Base namespace [REQUIRED]"
+}).option('root', {
+    abbr: 'r',
+    desc: "Project root (if not the current directory)"
+}).option('src', {
+    abbr: 's',
+    desc: "Path to a project source folder. If does not exist, will be created."
+}).option('build', {
+    abbr: 'b',
+    desc: "Path to a project build folder. If does not exist, will be created."
+});
+
+// create new class
+sc.command('newclass', {
+    desc: "Creates a new class file",
+    callback: function(options) {
+        if (!_.has(options, "name") || _.isEmpty(options["name"])) {
+            var nm = readlineSync.question("New class name: ");
+            if (_.isUndefined(nm) || _.isNull(nm) || _.isEmpty(nm)) {
+                console.error("Class name is required");
+                return;
+            }
+            options["name"] = nm;
+        }
+        projectJs.createNewClass(options);
+    }
+}).option('name', {
+    abbr: 'n',
+    desc: "New class name [REQUIRED]"
+}).option('path', {
+    abbr: 'p',
+    desc: "Path to create class file on (if not in the current directory)"
+});
+
+// create new directory / package (not entirely necessary, but what the heck)
+var newDirCallback = function(options) {
+    if (!_.has(options, "name") || _.isEmpty(options.name)) {
+        var nm = readlineSync.question("New package name: ");
+        if (_.isUndefined(nm) || _.isNull(nm) || _.isEmpty(nm)) {
+            console.error("Class name is required");
+            return;
+        }
+        options.name = nm;
+    }
+    fs.mkdirSync(options.name.toLowerCase());
+};
+sc.command('newdir', {
+    desc: "Creates a new package directory (though mkdir works fine too)",
+    callback: newDirCallback
+}).option("name", {
+    abbr: "n",
+    desc: "New directory name"
+});
+sc.command('newpackage', {
+    desc: "Alias for newdir",
+    callback: newDirCallback
+}).option("name", {
+    abbr: "n",
+    desc: "New directory name"
+});
+
+// add dependency
+sc.command('add-dependency', {
+    desc: "Adds a dependency to the project",
+    callback: function(options) {
+        if (!_.has(options, "name") || _.isEmpty(options.name)) {
+            var nm = readlineSync.question("New dependency name: ");
+            if (_.isUndefined(nm) || _.isNull(nm) || _.isEmpty(nm)) {
+                console.error("Dependency name is required");
+                return;
+            }
+            options.name = nm;
+        }
+        if (!_.has(options, 'path') || _.isEmpty(options.path)) {
+            var path = readlineSync.question("Path to dependency: ");
+            if (_.isUndefined(path) || _.isNull(path) || _.isEmpty(path)) {
+                console.error("Path to dependency is required");
+                return;
+            }
+            options.path = path;
+        }
+        projectJs.addDependency(options);
+    }
+}).option('name', {
+    abbr: 'n',
+    desc: "Name of dependency (i.e. what the dependency should be referred to as within the project)"
+}).option('path', {
+    abbr: 'p',
+    desc: "Path to dependency"
+});
+
+// add class alias
+var aliasCallback = function(options) {
+    if (!_.has(options, "alias") || _.isEmpty(options.alias)) {
+        var alias = readlineSync.question("Enter alias: ");
+        if (_.isUndefined(alias) || _.isNull(alias) || _.isEmpty(alias)) {
+            console.error("Alias is required");
+            return;
+        }
+        options.alias = alias;
+    }
+    if (!_.has(options, "name") || _.isEmpty(options.name)) {
+        var nm = readlineSync.question("Class name: ");
+        if (_.isUndefined(nm) || _.isNull(nm) || _.isEmpty(nm)) {
+            console.error("Class name is required");
+            return;
+        }
+        options.name = nm;
+    }
+    projectJs.addAlias({
+        'alias': options.alias,
+        'class': options.name
+    });
+};
+sc.command('add-alias', {
+    desc: "Adds a shorthand alias for an existing class within the project",
+    callback: aliasCallback
+}).option('alias', {
+    abbr: 'a',
+    desc: 'The alias'
+}).option('name', {
+    abbr: 'n',
+    desc: "The full class name"
+});
+sc.command('alias', {
+    desc: "Shorthand form for add-alias",
+    callback: aliasCallback
+}).option('alias', {
+    abbr: 'a',
+    desc: 'The alias'
+}).option('name', {
+    abbr: 'n',
+    desc: "The full class name"
+});
+
+// build
+sc.command("build", {
+    desc: 'Builds the project, removing any dependencies on ProjectJs',
+    callback: function() {
+        projectJs.build();
+    }
+});
+
+// run
+sc.command("run", {
+    desc: "Compiles and runs the project",
+    callback: function() {
+        projectJs.run();
+    }
+});
+
+sc.parse();
