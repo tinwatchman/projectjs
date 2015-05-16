@@ -9,6 +9,18 @@ var fs = require('fs'),
     ProjectJs = require('../project'),
     projectJs = new ProjectJs();
 
+var ensureRequiredOption = function(options, prop, question, errMessage) {
+    if (!_.has(options, prop) || _.isEmpty(options[prop])) {
+        var val = readlineSync.question(question);
+        if (_.isUndefined(val) || _.isNull(val) || _.isEmpty(val)) {
+            console.error(errMessage);
+            return false;
+        }
+        options[prop] = val;
+    }
+    return true;
+};
+
 sc.scriptName("projectjs");
 
 // version command
@@ -32,7 +44,7 @@ sc.command('init', {
             options["namespace"] = ns;
         }
         if (!_.has(options, "src")) {
-            var src = readlineSync.question("Name a source folder for this project? (Optional; leave blank for none) : ", {
+            var src = readlineSync.question("Name project source folder (leave blank to default to 'src') : ", {
                 defaultInput: "src"
             });
             if (!_.isUndefined(src) && !_.isNull(src) && !_.isEmpty(src)) {
@@ -40,7 +52,7 @@ sc.command('init', {
             }
         }
         if (!_.has(options, "build")) {
-            var build = readlineSync.question("Name a build folder for this project? (Optional; leave blank for none) : ", {
+            var build = readlineSync.question("Name project build folder (leave blank to default to 'build') : ", {
                 defaultInput: "build"
             });
             if (!_.isUndefined(build) && !_.isNull(build) && !_.isEmpty(build)) {
@@ -68,8 +80,14 @@ sc.command('init', {
 sc.command('newclass', {
     desc: "Creates a new class file",
     callback: function(options) {
+        console.log(options);
         if (!_.has(options, "name") || _.isEmpty(options["name"])) {
-            var nm = readlineSync.question("New class name: ");
+            var nm;
+            if (_.has(options, "0") && _.isString(options["0"]) && !_.isEmpty(options["0"])) {
+                nm = options["0"];
+            } else {
+                nm = readlineSync.question("New class name: ");
+            }
             if (_.isUndefined(nm) || _.isNull(nm) || _.isEmpty(nm)) {
                 console.error("Class name is required");
                 return;
@@ -185,6 +203,64 @@ sc.command('alias', {
 }).option('name', {
     abbr: 'n',
     desc: "The full class name"
+});
+
+// set start script
+sc.command('set-start', {
+    desc: "Sets the entry point for the project",
+    callback: function(options) {
+        if (_.has(options, 'use-script') && options['use-script'] === true) {
+            // if setting a script file as the start point
+            
+            var isFileSet = ensureRequiredOption(
+                                options, 
+                                'file', 
+                                "Path to script (relative to source directory): ", 
+                                "Path to script file is required"
+                            );
+
+            if (isFileSet) {
+                projectJs.setStartScript({
+                    "script": options.file
+                });
+            }
+
+        } else {
+            // if setting a specific class and method as the start point
+            var isClassSet = ensureRequiredOption(
+                    options,
+                    'class',
+                    'Starting class name: ',
+                    'Class name is required'
+                ),
+                isMethodSet = ensureRequiredOption(
+                    options,
+                    'method',
+                    'Class method to call: ',
+                    'Class method is required'
+                );
+
+            if (isClassSet && isMethodSet) {
+                projectJs.setStartClass(options);
+            }
+        }
+    }
+}).option('use-script', {
+    abbr: 's',
+    desc: 'Set the entry point to a script file',
+    flag: true
+}).option('file', {
+    abbr: 'f',
+    desc: 'Path to the script file that will start the project'
+}).option('class', {
+    abbr: 'c',
+    desc: 'Name of class to load at project start'
+}).option('method', {
+    abbr: 'm',
+    desc: 'Name of class method to run when starting the project'
+}).option('output', {
+    abbr: 'o',
+    desc: 'Name of starting script to output at project build (defaults to "./start.js")'
 });
 
 // build

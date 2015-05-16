@@ -31,46 +31,45 @@ module.exports = (function() {
         this.init = function(options) {
             var fs = require('fs-extra'),
                 path = require('path'),
-                ownVersion = require('own-version'),
                 _ = require('underscore'),
-                ProjectJsFile = require('./lib/projectfile'),
+                ProjectJsFactory = require('./lib/factory'),
                 util = require('./lib/util');
 
+            if (!_.has(options, 'namespace')) {
+                throw new Error("Base namespace is required!");
+                return;
+            }
+            
             var root = _.has(options, "root") ? options['root'] : process.cwd(),
-                baseNs = _.has(options, 'namespace') ? options['namespace'] : "project",
-                srcDir = _.has(options, 'src') ? options['src'] : null,
-                buildDir = _.has(options, 'build') ? options['build'] : null,
-                currentVersion = ownVersion.sync();
-
-            var project = new ProjectJsFile({
-                "data": {
-                    "namespace": {
-                        "base": baseNs,
-                        "map": {},
-                        "dependencies": {},
-                        "aliases": {}
-                    },
-                    "srcDir": "",
-                    "buildDir": "",
-                    "start": "",
-                    "schema": {
-                        "name": "projectjs",
-                        "version": currentVersion
-                    }
+                args = {
+                    'baseNs': _.has(options, 'namespace') ? options['namespace'] : undefined,
                 },
-                "rootDir": root
-            });
-            if (srcDir !== null) {
-                project.setSrcDir('./' + util.convertBackSlashes(srcDir));
-                fs.ensureDirSync(path.join(root, srcDir));
+                factory = new ProjectJsFactory();
+
+            if (_.has(options, 'src') && !_.isEmpty(options['src'])) {
+                if (path.isAbsolute(options['src'])) {
+                    args['srcDir'] = options['src'];
+                } else {
+                    args['srcDir'] = './' + util.convertBackSlashes(options['src']);
+                }
+                // make sure given source directory exists
+                fs.ensureDirSync(path.join(root, args['srcDir']));
             }
-            if (buildDir !== null) {
-                project.setBuildDir('./' + util.convertBackSlashes(buildDir));
-                fs.ensureDirSync(path.join(root, buildDir));
+            if (_.has(options, 'build') && !_.isEmpty(options['build'])) {
+                if (path.isAbsolute(options['build'])) {
+                    args['buildDir'] = options['build'];
+                } else {
+                    args['buildDir'] = './' + util.convertBackSlashes(options['build']);
+                }
+                // make sure given build directory exists
+                fs.ensureDirSync(path.join(root, args['buildDir']));
             }
 
-            var filePath = path.join(root, "project.json");
-            writeProjectFile(project, filePath);
+            var json = factory.getProjectJson(args),
+                filePath = path.join(root, "project.json");
+
+            fs.writeFileSync(filePath, json, {'encoding':'utf8'});
+
             console.log("Project created!");
         };
 
@@ -135,6 +134,55 @@ module.exports = (function() {
             projectFile.addAlias(options['alias'], options['class']);
             writeProjectFile(projectFile, root.file);
             console.log("Alias added");
+        };
+
+        this.setStartScript = function(options) {
+            var _ = require('underscore'),
+                ProjectJsParser = require('./lib/parser');
+
+            if (!_.has(options, "script") || _.isEmpty(options.script)) {
+                throw new Error("Script parameter is required");
+            }
+
+            var root = findProjectRoot(),
+                parser = new ProjectJsParser(),
+                projectFile = parser.loadProjectFile(root.file);
+
+            // TODO: add more verification / check to make sure file exists / is a file path
+            
+            projectFile.setStart(options.script);
+            writeProjectFile(projectFile, root.file);
+            console.log("Start point set");
+        };
+
+        this.setStartClass = function(options) {
+            var _ = require('underscore'),
+                ProjectJsParser = require('./lib/parser');
+
+            if (!_.has(options, "class") || !_.has(options, "method")) {
+                throw new Error("Required parameter missing");
+            }
+
+            var root = findProjectRoot(),
+                parser = new ProjectJsParser(),
+                projectFile = parser.loadProjectFile(root.file);
+                //registry = parser.createRegistry(projectFile);
+
+            // TODO: add more verification / check to make sure class
+            // exists in the registry / has the specified method, etc.
+            
+            if (!_.has(options, "output") || _.isEmpty(options.output)) {
+                // default output to "start.js"
+                options.output = "./start.js";
+            }
+
+            projectFile.setStart({
+                "class": options["class"],
+                "method": options["method"],
+                "output": options["output"]
+            });
+            writeProjectFile(projectFile, root.file);
+            console.log("Start point set");
         };
 
         this.build = function() {

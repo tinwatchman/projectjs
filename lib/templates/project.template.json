@@ -1,0 +1,15 @@
+{
+    "namespace": {
+        "base": "{{{baseNs}}}",
+        "map": {},
+        "dependencies": {},
+        "aliases": {}
+    },
+    "srcDir": "{{{srcDir}}}",
+    "buildDir": "{{{buildDir}}}",
+    "start": "",
+    "schema": {
+        "name": "projectjs",
+        "version": "{{{ownVersion}}}"
+    }
+}

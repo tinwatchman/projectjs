@@ -8,7 +8,7 @@ describe("ProjectJsFactory", function() {
         factory = new ProjectJsFactory();
     });
 
-    describe("ProjectJsFactory.getRelativeClassPath", function() {
+    describe("getRelativeClassPath", function() {
         it("should exist", function() {
             expect(factory.getRelativeClassPath).toBeDefined();
             expect(factory.getRelativeClassPath).toBeFunction();
@@ -43,7 +43,7 @@ describe("ProjectJsFactory", function() {
         });
     });
 
-    describe("ProjectJsFactory.getNewClassName", function() {
+    describe("getNewClassName", function() {
         it("should exist", function() {
             expect(factory.getNewClassName).toBeDefined();
             expect(factory.getNewClassName).toBeFunction();
@@ -67,7 +67,7 @@ describe("ProjectJsFactory", function() {
         });
     });
 
-    describe("ProjectJsFactory.getStartScript", function() {
+    describe("getStartScript", function() {
 
         it("should exist", function() {
             expect(factory.getStartScript).toBeDefined();
@@ -99,5 +99,26 @@ describe("ProjectJsFactory", function() {
                          "someClass.start(2, 5, 'go');";
             expect(result).toMatch(/someClass\.start\(2, 5, \Wgo\W\);/);
         });
+
+    });
+
+    describe("getProjectJson", function() {
+
+        it("should return a JSON string representing a new project.json file", function() {
+            var args = {
+                "baseNs": "sample.namespace",
+                "srcDir": "source",
+                "buildDir": "build",
+                "version": "whatever-version"
+            };
+            var result = factory.getProjectJson(args),
+                parsed = JSON.parse(result);
+            expect(parsed.namespace).toBeDefined();
+            expect(parsed.namespace.base).toEqual("sample.namespace");
+            expect(parsed.srcDir).toEqual("source");
+            expect(parsed.buildDir).toEqual("build");
+            expect(parsed.schema.version).toEqual("whatever-version");
+        });
+        
     });
 });
