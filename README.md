@@ -7,7 +7,7 @@ Enter **Project.js**. Project.js is a simple collection of command-line tools in
 
 **Please note that this project is very much currently in development! It is by no means ready for production at this time! Use at your own risk!**
 
-
+<a name="getting_started"></a>
 ## Getting Started
 
 To install project.js globally, run the following from the command line:
@@ -16,7 +16,7 @@ To install project.js globally, run the following from the command line:
 npm install -g projectjs
 ```
 
-
+<a name="create_project"></a>
 ### Creating a project
 
 To create a project, navigate to the directory you wish to work within (i.e. the same directory that your *package.json* file would be kept in). Before you begin, you will need to decide on a **base namespace** for your project. This is a unique name that serves to distinguish the project's code from that of others. For example: *net.jonstout.myprojectname*. Once you have decided, enter this into the command line:
@@ -29,7 +29,7 @@ You will be prompted to name your project's source and build folders. (The *sour
 
 A new *project.json* file will be created in the root project directory.
 
-
+<a name="project_file"></a>
 ### The project.json file
 
 The content of your project.json file will look something like this:
@@ -54,7 +54,7 @@ The content of your project.json file will look something like this:
 
 The heart of project.js is the *map* property. As you add classes, the project.json file will be used to track your class names and their file paths. This will allow you to import classes via their names rather than their file paths.
 
-
+<a name="use_function"></a>
 ### The use function
 
 Within class files and scripts managed by ProjectJs, you will have access to the *use* function. The use function allows you to import classes and objects via namespace reference. For instance:
@@ -75,7 +75,7 @@ var path = require('path');
 
 When you build a project, the use statements are automatically replaced with requires. All file paths are automatically managed by the compiler.
 
-
+<a name="create_class"></a>
 ### Creating a new class
 
 Navigate into your source directory if you have one. To create a new class, enter this into the command line:
@@ -121,11 +121,12 @@ If you open the project.json file, you'll notice that it now looks something lik
 
 You can now import this class in other project files by calling `use('my.namespace.MyClassName')`.
 
-
+<a name="set_start_point"></a>
 ### Setting the project start point
 
 You will also need to set a *start point* (or *entry point*) for your project. This represents the code that should be executed first when the project runs. There are two ways to do so:
 
+<a name="set_script_file"></a>
 #### Option 1: Set a starting script file
 
 First, you can simply set a particular script file to be run in order to start up the project. To do so, enter the following into the command line:
@@ -140,7 +141,8 @@ Your project.json should now contain something like the following:
     "start": "./path/to/your/scriptfile.js",
 ```
 
-#### Option 2: Set a starting class method
+<a name="set_start_class_method"></a>
+#### Option 2: Set a starting class and method
 
 Second, you can take a more object-oriented approach and name a starting class and method to invoke at startup. If you choose this option, project.js will automatically generate a starting script that will import the class you specify, instantiate it, and call one of its methods.
 
@@ -169,7 +171,7 @@ var startingClass = new StartingClass();
 startingClass.yourStartMethod();
 ```
 
-
+<a name="run_project"></a>
 ### Running the project
 
 To compile and run the project, simply enter this command from anywhere within the project directory structure:
@@ -189,6 +191,7 @@ projectjs build
 
 As has been mentioned, building the project will compile and output it in a form that can be processed without project.js. All `use` statements will be removed and replaced with standard `require` imports.
 
+<a name="features"></a>
 ## Features
 
 * Keeps projects organized with separate files for each class and simple namespacing to make imports easy.
@@ -197,9 +200,10 @@ As has been mentioned, building the project will compile and output it in a form
 * Compiler wraps classes in boilerplate code so you don't have to
 * More details soon!
 
+<a name="todo"></a>
 ## To Do List
 
-* (More and better) documentation
+* (More) documentation
 * More test coverage
 * Test on Windows
 * Figure out how to handle dependencies / if they're even necessary
@@ -209,10 +213,7 @@ As has been mentioned, building the project will compile and output it in a form
 * Grunt plugin
 * Gulp plugin (?)
 
-## Documentation
-
-... is better, yes? Still working on it.
-
+<a name="credits"></a>
 ## Credits
 
 Created by [Jon Stout](http://www.jonstout.net). Licensed under [the MIT license](http://opensource.org/licenses/MIT).
