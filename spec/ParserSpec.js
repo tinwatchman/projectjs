@@ -8,7 +8,7 @@ describe("ProjectJsParser", function() {
         parser = new ProjectJsParser();
     });
 
-    describe("ProjectJsParser.parse", function() {
+    describe("parse", function() {
         it("should exist", function() {
             expect(parser.parse).toBeDefined();
             expect(parser.parse).toBeFunction();
@@ -27,7 +27,7 @@ describe("ProjectJsParser", function() {
         });
     });
 
-    describe("ProjectJsParser.verify", function() {
+    describe("verify", function() {
         it("should exist", function() {
             expect(parser.verify).toBeDefined();
             expect(parser.verify).toBeFunction();
@@ -195,7 +195,7 @@ describe("ProjectJsParser", function() {
         });
     });
 
-    describe("ProjectJsParser.createRegistry", function() {
+    describe("createRegistry", function() {
         it("should exist", function() {
             expect(parser.createRegistry).toBeDefined();
             expect(parser.createRegistry).toBeFunction();
@@ -209,7 +209,7 @@ describe("ProjectJsParser", function() {
                     "dependencies": {},
                     "aliases": {}
                 }
-            }, {});
+            });
             expect(registry).not.toBeNull();
             expect(registry.toString()).toBe("[object ProjectJsRegistry]");
         });
@@ -222,7 +222,7 @@ describe("ProjectJsParser", function() {
                         "some.namespace.Class": "./Class"
                     }
                 }
-            }, {});
+            });
             expect(registry.resolve("some.namespace.*")).not.toBeNull();
         });
 

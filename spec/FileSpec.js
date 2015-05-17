@@ -6,7 +6,7 @@ describe("ProjectJsFileUtil", function() {
 
     var fileUtil;
 
-    describe("ProjectJsFileUtil.copyDirectory", function() {
+    describe("copyDirectory", function() {
         var tmpPath,
             fromPath,
             toPath,
