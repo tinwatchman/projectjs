@@ -28,6 +28,15 @@ module.exports = (function() {
             return ownVersion.sync();
         };
 
+        /**
+         * Creates a new project in the given or working directory.
+         * @param  {String}   namespace The project's base namespace. Required.
+         * @param  {String}   root      Root path of the project. Optional.
+         * @param  {String}   src       Name of or path to source folder
+         * @param  {String}   build     Name of or path to build folder
+         * @param  {Function} callback  Callback function. Optional.
+         * @return {void}
+         */
         this.init = function(options) {
             var fs = require('fs-extra'),
                 path = require('path'),
@@ -35,20 +44,35 @@ module.exports = (function() {
                 ProjectJsFactory = require('./lib/factory'),
                 util = require('./lib/util');
 
-            if (!_.has(options, 'namespace')) {
-                throw new Error("Base namespace is required!");
+            var hasNs = (_.has(options, 'namespace') && !_.isEmpty(options['namespace'])),
+                hasCallback = _.has(options, 'callback');
+
+            if (!hasNs && hasCallback) {
+                options.callback.call(null, new Error("Base namespace is required!"));
                 return;
+            } else if (hasNs) {
+                throw new Error("Base namespace is required!");
             }
 
+            // check root to see if it already has a project in it
             var root = _.has(options, "root") ? options['root'] : process.cwd(),
-                args = {
-                    'baseNs': _.has(options, 'namespace') ? options['namespace'] : undefined,
+                isProject = fs.existsSync(path.join(root, './project.json'));
+            if (isProject && hasCallback) {
+                options.callback.call(null, new Error("A project already exists in this directory"));
+                return;
+            } else {
+                throw new Error("A project already exists in this directory");
+            }
+
+            // construct src and build folders
+            var args = {
+                    'baseNs': options['namespace']
                 },
                 factory = new ProjectJsFactory();
-
             if (_.has(options, 'src') && !_.isEmpty(options['src'])) {
                 if (path.isAbsolute(options['src'])) {
-                    args['srcDir'] = options['src'];
+                    var srcDirPath = path.relative(root, options['src']);
+                    args['srcDir'] = util.convertBackSlashes(srcDirPath);
                 } else {
                     args['srcDir'] = './' + util.convertBackSlashes(options['src']);
                 }
@@ -57,7 +81,8 @@ module.exports = (function() {
             }
             if (_.has(options, 'build') && !_.isEmpty(options['build'])) {
                 if (path.isAbsolute(options['build'])) {
-                    args['buildDir'] = options['build'];
+                    var buildDirPath = path.relative(root, options['build']);
+                    args['buildDir'] = util.convertBackSlashes(buildDirPath);
                 } else {
                     args['buildDir'] = './' + util.convertBackSlashes(options['build']);
                 }
@@ -65,20 +90,36 @@ module.exports = (function() {
                 fs.ensureDirSync(path.join(root, args['buildDir']));
             }
 
+            // write project.json file
             var json = factory.getProjectJson(args),
                 filePath = path.join(root, "project.json");
 
             fs.writeFileSync(filePath, json, {'encoding':'utf8'});
 
-            console.log("Project created!");
+            if (hasCallback) {
+                options.callback.call(null, null, {'success': true});
+            }
         };
 
-        this.createNewClass = function(options) {
+        /**
+         * Creates and adds a new class to the project.
+         * @param  {String}   name     Name of class to add
+         * @param  {String}   path     File path to class. Optional.
+         * @param  {Function} callback Callback function.
+         * @return {void}
+         */
+        this.createClass = function(options) {
             var _ = require('underscore'),
                 ProjectJsParser = require('./lib/parser'),
                 ProjectJsFactory = require('./lib/factory');
 
-            if (!_.has(options, "name")) {
+            var hasName = (_.has(options, 'name') && !_.isEmpty(options.name)),
+                hasCallback = (_.has(options, 'callback') && _.isFunction(options.callback));
+
+            if (!hasName && hasCallback) {
+                options.callback.call(null, new Error("Class name is required!"));
+                return;
+            } else if (!hasName) {
                 throw new Error("Class name is required!");
             }
 
@@ -91,13 +132,17 @@ module.exports = (function() {
             var classInfo = factory.createNewClass(options.name, classDir, projectFile);
             projectFile.addClass(classInfo.name, classInfo.path);
             writeProjectFile(projectFile, root.file);
-            console.log("Class %s created!", classInfo.name);
+
+            if (hasCallback) {
+                options.callback.call(null, null, _.extend({'success':true}, classInfo));
+            }
         };
 
         /**
          * Removes a class from the project and deletes the class file.
-         * @param  {String}   name     Name of class
-         * @param  {Function} callback Callback function. Optional.
+         * @param  {String}   name       Name of class
+         * @param  {Boolean}  retainFile Whether to delete the class file or not. Optional.
+         * @param  {Function} callback   Callback function. Optional.
          * @return {void}
          */
         this.removeClass = function(options) {

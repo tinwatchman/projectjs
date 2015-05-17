@@ -44,7 +44,7 @@ sc.command('init', {
             options["namespace"] = ns;
         }
         if (!_.has(options, "src")) {
-            var src = readlineSync.question("Name project source folder (leave blank to default to 'src') : ", {
+            var src = readlineSync.question("Name project source folder (leave blank to default to 'src'): ", {
                 defaultInput: "src"
             });
             if (!_.isUndefined(src) && !_.isNull(src) && !_.isEmpty(src)) {
@@ -52,13 +52,21 @@ sc.command('init', {
             }
         }
         if (!_.has(options, "build")) {
-            var build = readlineSync.question("Name project build folder (leave blank to default to 'build') : ", {
+            var build = readlineSync.question("Name project build folder (leave blank to default to 'build'): ", {
                 defaultInput: "build"
             });
             if (!_.isUndefined(build) && !_.isNull(build) && !_.isEmpty(build)) {
                 options["build"] = build;
             }
         }
+
+        options.callback = function(err, result) {
+            if (err === null && result['success'] === true) {
+                console.log("Project created!");
+            } else if (err !== null) {
+                console.error("ERROR: %s", err.message);
+            }
+        };
 
         projectJs.init(options);
     }
@@ -93,7 +101,16 @@ sc.command('newclass', {
             }
             options["name"] = nm;
         }
-        projectJs.createNewClass(options);
+
+        options.callback = function(err, info) {
+            if (err === null && info['success'] === true) {
+                console.log("Class %s created!", info.name);
+            } else if (err !== null) {
+                console.error("ERROR: %s", err.message);
+            }
+        };
+
+        projectJs.createClass(options);
     }
 }).option('name', {
     abbr: 'n',
