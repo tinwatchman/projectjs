@@ -252,6 +252,42 @@ sc.command('alias', {
     desc: "The full class name"
 });
 
+// remove class alias
+sc.command('rm-alias', {
+    desc: "Removes an alias from the project",
+    callback: function(options) {
+        ensureRequiredOption(
+            options,
+            'alias',
+            "Enter alias to remove: ",
+            "Alias is required"
+        );
+        if (!_.has(options, 'force') || !options['force']) {
+            var isConfirmed = readlineSync.keyInYNStrict("Are you sure you want to delete this alias? This action cannot be undone!");
+            if (!isConfirmed) {
+                return;
+            }
+        }
+        projectJs.removeAlias({
+            "alias": options['alias'],
+            callback: function(err, response) {
+                if (err === null && response.success === true) {
+                    console.log("Alias %s removed", options['alias']);
+                } else if (err !== null) {
+                    console.error("ERROR: %s", err.message);
+                }
+            }
+        })
+    }
+}).option('alias', {
+    abbr: 'a',
+    desc: 'The alias to remove. Required.'
+}).option('force', {
+    abbr: 'f',
+    desc: "Force remove / don't ask for confirmation",
+    flag: true
+});
+
 // set start script
 sc.command('set-start', {
     desc: "Sets the entry point for the project",

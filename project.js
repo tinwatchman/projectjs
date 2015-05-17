@@ -94,6 +94,52 @@ module.exports = (function() {
             console.log("Class %s created!", classInfo.name);
         };
 
+        /**
+         * Removes a class from the project and deletes the class file.
+         * @param  {String}   name     Name of class
+         * @param  {Function} callback Callback function. Optional.
+         * @return {void}
+         */
+        this.removeClass = function(options) {
+            var fs = require('fs-extra'),
+                path = require('path'),
+                _ = require('underscore'),
+                ProjectJsParser = require('./lib/parser');
+
+            var hasName = (_.has(options, "name") && !_.isEmpty(options.name)),
+                hasCallback = (_.has(options, 'callback') && _.isFunction(options.callback));
+
+            if (!hasName && hasCallback) {
+                options.callback.call(null, new Error("Class name is required!"), null);
+                return;
+            } else if (!hasName) {
+                throw new Error("Class name is required!");
+            }
+
+            var className = options.name,
+                root = findProjectRoot(),
+                parser = new ProjectJsParser(),
+                projectFile = parser.loadProjectFile(root.file),
+                registry = parser.createRegistry(projectFile);
+
+            if (registry.has(className)) {
+                var classFilePath = registry.resolve(className),
+                    filePath = path.join(root.dir, classFilePath) + ".js";
+                fs.removeSync(filePath);
+                projectFile.removeClass(className);
+                writeProjectFile(projectFile, root.file);
+                if (hasCallback) {
+                    options.callback.call(null, null, {'class': className, 'file': filePath, 'success': true});
+                }
+
+            } else if (hasCallback) {
+                options.callback.call(null, new Error("Class not found in registry!"), {'success':false});
+                return;
+            } else {
+                throw new Error("Class not found in registry!");
+            }
+        };
+
         this.addDependency = function(options) {
             var ProjectJsParser = require('./lib/parser'),
                 _ = require('underscore');
@@ -134,6 +180,36 @@ module.exports = (function() {
             projectFile.addAlias(options['alias'], options['class']);
             writeProjectFile(projectFile, root.file);
             console.log("Alias added");
+        };
+
+        this.removeAlias = function(options) {
+            var ProjectJsParser = require('./lib/parser'),
+                _ = require('underscore');
+
+            var hasAlias = (_.has(options, "alias") && !_.isEmpty(options.alias)),
+                hasCallback = (_.has(options, 'callback') && _.isFunction(options.callback));
+
+            if (!hasAlias && hasCallback) {
+                options.callback.call(null, new Error("Alias is required!"), null);
+            } else if (!hasAlias) {
+                throw new Error("Alias is required!");
+            }
+
+            var root = findProjectRoot(),
+                parser = new ProjectJsParser(),
+                projectFile = parser.loadProjectFile(root.file);
+
+            if (projectFile.hasAlias(options.alias)) {
+                projectFile.removeAlias(options.alias);
+                writeProjectFile(projectFile, root.file);
+                if (hasCallback) {
+                    options.callback.call(null, null, {'success': true});
+                }
+            } else if (hasCallback) {
+                options.callback.call(null, new Error("Alias not registered!"), {'success': false});
+            } else {
+                throw new Error("Alias not registered!");
+            }
         };
 
         this.setStartScript = function(options) {
@@ -212,45 +288,6 @@ module.exports = (function() {
             runner.run(root.dir, projectFile, registry);
         };
 
-        this.removeClass = function(options) {
-            var fs = require('fs-extra'),
-                path = require('path'),
-                _ = require('underscore'),
-                ProjectJsParser = require('./lib/parser');
-
-            var hasName = _.has(options, "name"),
-                hasCallback = _.has(options, 'callback');
-
-            if (!hasName && hasCallback) {
-                options.callback.call(null, new Error("Class name is required!"), null);
-                return;
-            } else if (!hasName) {
-                throw new Error("Class name is required!");
-            }
-
-            var className = options.name,
-                root = findProjectRoot(),
-                parser = new ProjectJsParser(),
-                projectFile = parser.loadProjectFile(root.file),
-                registry = parser.createRegistry(projectFile);
-
-            if (registry.has(className)) {
-                var classFilePath = registry.resolve(className),
-                    filePath = path.join(root.dir, classFilePath) + ".js";
-                fs.removeSync(filePath);
-                projectFile.removeClass(className);
-                writeProjectFile(projectFile, root.file);
-                if (hasCallback) {
-                    options.callback.call(null, null, {'class': className, 'file': filePath, 'success': true});
-                }
-
-            } else if (hasCallback) {
-                options.callback.call(null, new Error("Class not found in registry!"), {'success':false});
-                return;
-            } else {
-                throw new Error("Class not found in registry!");
-            }
-        };
     };
 
     return ProjectJs;
