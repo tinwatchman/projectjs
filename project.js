@@ -125,7 +125,9 @@ module.exports = (function() {
             if (registry.has(className)) {
                 var classFilePath = registry.resolve(className),
                     filePath = path.join(root.dir, classFilePath) + ".js";
-                fs.removeSync(filePath);
+                if (!_.has(options, 'retainFile') || options['retainFile'] === false) {
+                    fs.removeSync(filePath);
+                }
                 projectFile.removeClass(className);
                 writeProjectFile(projectFile, root.file);
                 if (hasCallback) {

@@ -196,6 +196,7 @@ As has been mentioned, building the project will compile and output it in a form
 * Test on Windows
 * Figure out how to handle dependencies / if they're even necessary
 * Figure out if source and build folders should really be mandatory
+* Consider adding a "resources" section
 * `refactor` / `rename-class` / `mv-class` command
 * Grunt plugin
 * Gulp plugin (?)

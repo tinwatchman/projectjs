@@ -133,6 +133,7 @@ sc.command('rmclass', {
         // if we make it this far, let's go ahead...
         projectJs.removeClass({
             'name': options['name'],
+            'retainFile': _.has(options, 'cache') ? true : false,
             'callback': function(err, data) {
                 if (err === null && data['success'] === true) {
                     console.log("Class %s removed from project", data['class'])
@@ -148,6 +149,10 @@ sc.command('rmclass', {
 }).option('force', {
     abbr: 'f',
     desc: "Force remove / don't ask for confirmation",
+    flag: true
+}).option('cache', {
+    abbr: 'c',
+    desc: "Delete the class reference from the project, but keep the file on disk",
     flag: true
 });
 
