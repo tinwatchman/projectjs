@@ -80,7 +80,6 @@ sc.command('init', {
 sc.command('newclass', {
     desc: "Creates a new class file",
     callback: function(options) {
-        console.log(options);
         if (!_.has(options, "name") || _.isEmpty(options["name"])) {
             var nm;
             if (_.has(options, "0") && _.isString(options["0"]) && !_.isEmpty(options["0"])) {
@@ -102,6 +101,54 @@ sc.command('newclass', {
 }).option('path', {
     abbr: 'p',
     desc: "Path to create class file on (if not in the current directory)"
+});
+
+// remove class
+sc.command('rmclass', {
+    desc: "Removes a class file from the project",
+    callback: function(options) {
+        // make sure we have class name
+        if (!_.has(options, "name") || _.isEmpty(options["name"])) {
+            if (_.has(options, "0") && _.isString(options["0"]) && !_.isEmpty(options["0"])) {
+                options['name'] = options["0"];
+            } else {
+                var isNameProvided = ensureRequiredOption(
+                    options,
+                    'name',
+                    "Name of class to delete: ",
+                    "Class name is required"
+                );
+                if (!isNameProvided) {
+                    return;
+                }
+            }
+        }
+        // confirm if needed
+        if (!_.has(options, 'force') || !options['force']) {
+            var isConfirmed = readlineSync.keyInYNStrict("Are you sure you want to delete this class? This action cannot be undone!");
+            if (!isConfirmed) {
+                return;
+            }
+        }
+        // if we make it this far, let's go ahead...
+        projectJs.removeClass({
+            'name': options['name'],
+            'callback': function(err, data) {
+                if (err === null && data['success'] === true) {
+                    console.log("Class %s removed from project", data['class'])
+                } else if (err != null) {
+                    console.error("ERROR: %s", err.message);
+                }
+            }
+        });
+    }
+}).option('name', {
+    abbr: 'n',
+    desc: 'Class name [REQUIRED]'
+}).option('force', {
+    abbr: 'f',
+    desc: "Force remove / don't ask for confirmation",
+    flag: true
 });
 
 // create new directory / package (not entirely necessary, but what the heck)

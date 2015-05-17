@@ -39,7 +39,7 @@ module.exports = (function() {
                 throw new Error("Base namespace is required!");
                 return;
             }
-            
+
             var root = _.has(options, "root") ? options['root'] : process.cwd(),
                 args = {
                     'baseNs': _.has(options, 'namespace') ? options['namespace'] : undefined,
@@ -210,6 +210,46 @@ module.exports = (function() {
 
             var runner = new ProjectJsRunner();
             runner.run(root.dir, projectFile, registry);
+        };
+
+        this.removeClass = function(options) {
+            var fs = require('fs-extra'),
+                path = require('path'),
+                _ = require('underscore'),
+                ProjectJsParser = require('./lib/parser');
+
+            var hasName = _.has(options, "name"),
+                hasCallback = _.has(options, 'callback');
+
+            if (!hasName && hasCallback) {
+                options.callback.call(null, new Error("Class name is required!"), null);
+                return;
+            } else if (!hasName) {
+                throw new Error("Class name is required!");
+            }
+
+            var className = options.name,
+                root = findProjectRoot(),
+                parser = new ProjectJsParser(),
+                projectFile = parser.loadProjectFile(root.file),
+                registry = parser.createRegistry(projectFile);
+
+            if (registry.has(className)) {
+                var classFilePath = registry.resolve(className),
+                    filePath = path.join(root.dir, classFilePath) + ".js";
+                fs.removeSync(filePath);
+                projectFile.removeClass(className);
+                writeProjectFile(projectFile, root.file);
+                if (hasCallback) {
+                    options.callback.call(null, null, {'class': className, 'file': filePath, 'success': true});
+                }
+
+            } else if (hasCallback) {
+                options.callback.call(null, new Error("Class not found in registry!"), {'success':false});
+                return;
+            } else {
+                throw new Error("Class not found in registry!");
+            }
         };
     };
 
