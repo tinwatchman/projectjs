@@ -2,7 +2,7 @@ describe("ProjectJsRegistry", function() {
     var ProjectJsRegistry = require("../lib/registry");
     var registry;
 
-    describe("ProjectJsRegistry.resolve", function() {
+    describe("resolve", function() {
         beforeEach(function() {
             registry = new ProjectJsRegistry({
                 "namespace": {
@@ -73,7 +73,7 @@ describe("ProjectJsRegistry", function() {
         });
     });
 
-    describe("ProjectJsRegistry compiled suffix", function() {
+    describe("compiled suffix functionality", function() {
         beforeEach(function() {
             registry = new ProjectJsRegistry({
                 "namespace": {
@@ -90,7 +90,8 @@ describe("ProjectJsRegistry", function() {
                     "aliases": {
                         "SomeClass": "some.namespace.package.SomeClass"
                     }
-                },
+                }
+            }, {
                 "compileSuffix": ".tmp",
                 "addCompileSuffix": true
             });
@@ -123,7 +124,7 @@ describe("ProjectJsRegistry", function() {
         });
     });
 
-    describe("ProjectJsRegistry source directory support", function() {
+    describe("source directory support", function() {
         beforeEach(function() {
             registry = new ProjectJsRegistry({
                 "namespace": {
@@ -142,6 +143,7 @@ describe("ProjectJsRegistry", function() {
                     }
                 },
                 "srcDir": "./src",
+            }, {
                 "addSrcDir": true
             });
         });
@@ -163,6 +165,44 @@ describe("ProjectJsRegistry", function() {
             registry.isAddingSrcDir(false);
             expect(registry.isAddingSrcDir()).toBe(false);
             expect(registry.resolve("SomeClass")).toEqual("./package/SomeClass");
+        });
+    });
+
+    describe("getClassNameFromFilePath", function() {
+        beforeEach(function() {
+            registry = new ProjectJsRegistry({
+                "namespace": {
+                    "base": "some.namespace",
+                    "map": {
+                        "some.namespace.package.SomeClass": "./package/SomeClass",
+                        "some.namespace.package.SomeOtherClass": "./package/SomeOtherClass",
+                        "some.namespace.package.*": [
+                            "some.namespace.package.SomeClass",
+                            "some.namespace.package.SomeOtherClass"
+                        ]
+                    },
+                    "dependencies": {
+                        "dependency": "./lib/dependency"
+                    },
+                    "aliases": {
+                        "SomeClass": "some.namespace.package.SomeClass",
+                        "SomeOtherClass": "some.namespace.package.SomeOtherClass",
+                        "SomePackage": "some.namespace.package.*"
+                    }
+                },
+                "srcDir": "./src"
+            }, {
+                "addSrcDir": true
+            });
+        });
+        
+        it("should be able to find the class name of the given file, provided it is registered", function() {
+            var file1 = "/Users/someuser/someproject/src/package/SomeClass.js",
+                file2 = "/Users/someuser/someproject/src/package/SomeOtherClass.js",
+                file3 = "/Users/someuser/someproject/src/package/SomeUnregisteredClass.js";
+            expect(registry.getClassNameFromFilePath(file1)).toEqual("some.namespace.package.SomeClass");
+            expect(registry.getClassNameFromFilePath(file2)).toEqual("some.namespace.package.SomeOtherClass");
+            expect(registry.getClassNameFromFilePath(file3)).toBeNull();
         });
     });
 });

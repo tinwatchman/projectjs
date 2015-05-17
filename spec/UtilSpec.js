@@ -42,4 +42,13 @@ describe("ProjectJsUtil", function() {
             expect(r).toEqual("/Users/someone/something/project/src");
         });
     });
+
+    describe("removeDrive", function() {
+        it("should remove the drive letter from the given path", function() {
+            expect(util.removeDrive("C:/dir/path/index.html")).toEqual("/dir/path/index.html");
+        });
+        it("should not modify paths without a drive letter", function() {
+            expect(util.removeDrive("/dir/path/index.html")).toEqual("/dir/path/index.html");
+        });
+    });
 });
