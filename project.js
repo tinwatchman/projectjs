@@ -246,7 +246,7 @@ module.exports = (function() {
 
             // TODO: check to make sure class path exists / resolve classes relative to cwd
             
-            projectFile.addAlias(options['alias'], options['class']);
+            projectFile.addAlias(options['alias'], options['className']);
             writeProjectFile(projectFile, root.file);
             
             if (hasCallback) {

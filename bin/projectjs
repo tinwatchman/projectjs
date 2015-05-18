@@ -232,22 +232,33 @@ sc.command('add-dependency', {
 
 // add class alias
 var aliasCallback = function(options) {
-    if (!_.has(options, "alias") || _.isEmpty(options.alias)) {
-        var alias = readlineSync.question("Enter alias: ");
-        if (_.isUndefined(alias) || _.isNull(alias) || _.isEmpty(alias)) {
-            console.error("Alias is required");
+    if (!_.has(options, "alias") && _.has(options, "0") && !_.isEmpty(options["0"])) {
+        options.alias = options["0"];
+    } else {
+        ensureRequiredOption(
+            options,
+            'alias',
+            "Enter alias: ",
+            "Alias is required"
+        );
+        if (!_.has(options, 'alias')) {
             return;
         }
-        options.alias = alias;
     }
-    if (!_.has(options, "name") || _.isEmpty(options.name)) {
-        var nm = readlineSync.question("Class name: ");
-        if (_.isUndefined(nm) || _.isNull(nm) || _.isEmpty(nm)) {
-            console.error("Class name is required");
+    if (!_.has(options, "name") && _.has(options, "1") && !_.isEmpty(options["1"])) {
+        options.name = options["1"];
+    } else {
+        ensureRequiredOption(
+            options,
+            "name",
+            "Enter name of class: ",
+            "Class name is required"
+        );
+        if (!_.has(options, 'name')) {
             return;
         }
-        options.name = nm;
     }
+
     projectJs.addAlias({
         'alias': options.alias,
         'className': options.name,
@@ -285,12 +296,16 @@ sc.command('alias', {
 sc.command('rm-alias', {
     desc: "Removes an alias from the project",
     callback: function(options) {
-        ensureRequiredOption(
-            options,
-            'alias',
-            "Enter alias to remove: ",
-            "Alias is required"
-        );
+        if (!_.has(options, 'alias') && _.has(options, '0') && !_.isEmpty(options['0'])) {
+            options['alias'] = options['0'];
+        } else {
+            ensureRequiredOption(
+                options,
+                'alias',
+                "Enter alias to remove: ",
+                "Alias is required"
+            );
+        }
         if (!_.has(options, 'force') || !options['force']) {
             var isConfirmed = readlineSync.keyInYNStrict("Are you sure you want to delete this alias? This action cannot be undone!");
             if (!isConfirmed) {
