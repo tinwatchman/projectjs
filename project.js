@@ -9,7 +9,7 @@ module.exports = (function() {
 
             var projectPath = findup("project.json");
             if (_.isUndefined(projectPath) || _.isNull(projectPath)) {
-                throw new Error("Could not find a project.json file or under the current directory!");
+                throw new Error("Could not find a project.json file within or under the current directory!");
             }
             return {
                 'file': projectPath,
@@ -26,6 +26,11 @@ module.exports = (function() {
         this.getVersion = function() {
             var ownVersion = require('own-version');
             return ownVersion.sync();
+        };
+
+        var isCallbackSet = function(options) {
+            var _ = require('underscore');
+            return (_.has(options, 'callback') && _.isFunction(options.callback));
         };
 
         /**
@@ -45,7 +50,7 @@ module.exports = (function() {
                 util = require('./lib/util');
 
             var hasNs = (_.has(options, 'namespace') && !_.isEmpty(options['namespace'])),
-                hasCallback = _.has(options, 'callback');
+                hasCallback = isCallbackSet(options);
 
             if (!hasNs && hasCallback) {
                 options.callback.call(null, new Error("Base namespace is required!"));
@@ -114,7 +119,7 @@ module.exports = (function() {
                 ProjectJsFactory = require('./lib/factory');
 
             var hasName = (_.has(options, 'name') && !_.isEmpty(options.name)),
-                hasCallback = (_.has(options, 'callback') && _.isFunction(options.callback));
+                hasCallback = isCallbackSet(options);
 
             if (!hasName && hasCallback) {
                 options.callback.call(null, new Error("Class name is required!"));
@@ -152,7 +157,7 @@ module.exports = (function() {
                 ProjectJsParser = require('./lib/parser');
 
             var hasName = (_.has(options, "name") && !_.isEmpty(options.name)),
-                hasCallback = (_.has(options, 'callback') && _.isFunction(options.callback));
+                hasCallback = isCallbackSet(options);
 
             if (!hasName && hasCallback) {
                 options.callback.call(null, new Error("Class name is required!"), null);
@@ -221,7 +226,7 @@ module.exports = (function() {
             // check for required options
             var hasAlias = (_.has(options, "alias") && !_.isEmpty(options['alias'])),
                 hasClassName = (_.has(options, "className") && !_.isEmpty(options['className'])),
-                hasCallback = (_.has(options, 'callback') && _.isFunction(options.callback));
+                hasCallback = isCallbackSet(options);
 
             if (!hasAlias && hasCallback) {
                 options.callback.call(null, new Error("Alias is required!"));
@@ -259,7 +264,7 @@ module.exports = (function() {
                 _ = require('underscore');
 
             var hasAlias = (_.has(options, "alias") && !_.isEmpty(options.alias)),
-                hasCallback = (_.has(options, 'callback') && _.isFunction(options.callback));
+                hasCallback = isCallbackSet(options);
 
             if (!hasAlias && hasCallback) {
                 options.callback.call(null, new Error("Alias is required!"), null);
@@ -294,7 +299,7 @@ module.exports = (function() {
                 ProjectJsParser = require('./lib/parser');
 
             var hasScript = (_.has(options, "script") && !_.isEmpty(options.script)),
-                hasCallback = (_.has(options, 'callback') && _.isFunction(options.callback));
+                hasCallback = isCallbackSet(options);
 
             if (!hasScript && hasCallback) {
                 options.callback.call(null, null, new Error("Script parameter is required"));
@@ -330,7 +335,7 @@ module.exports = (function() {
 
             var hasClassName = (_.has(options, 'className') && !_.isEmpty(options.className)),
                 hasMethod = (_.has(options, 'method') && !_.isEmpty(options.method)),
-                hasCallback = (_.has(options, 'callback') && _.isFunction(options.callback));
+                hasCallback = isCallbackSet(options);
 
             if (!hasClassName && hasCallback) {
                 options.callback.call(null, new Error("Class name is required"));
@@ -382,7 +387,7 @@ module.exports = (function() {
             var parser = new ProjectJsParser(),
                 projectFile,
                 registry,
-                hasCallback = (_.has(options, 'callback') && _.isFunction(options.callback));
+                hasCallback = isCallbackSet(options);
 
             if (_.has(options, 'projectFile') && !_.isEmpty(options.projectFile)) {
                 try {
@@ -413,17 +418,63 @@ module.exports = (function() {
             }
         };
 
-        this.run = function() {
-            var ProjectJsParser = require('./lib/parser'),
+        /**
+         * Runs a project.
+         * @param  {String}   projectFile Path to project file. Optional.
+         * @param  {Function} callback    Callback function
+         */
+        this.run = function(options) {
+            var fs = require('fs-extra'),
+                path = require('path'),
+                _ = require('underscore'),
+                ProjectJsParser = require('./lib/parser'),
                 ProjectJsRunner = require('./lib/runner');
 
-            var root = findProjectRoot(),
-                parser = new ProjectJsParser(),
-                projectFile = parser.loadProjectFile(root.file),
-                registry = parser.createRegistry(projectFile);
+            var hasRoot = (_.has(options, 'projectFile') && !_.isEmpty(options.projectFile)),
+                hasCallback = isCallbackSet(options);
 
+            var rootDir,
+                parser = new ProjectJsParser(),
+                projectFile,
+                registry;
+
+            // resolve project file paths
+            try {
+                if (hasRoot) {
+                    var filePath;
+                    try {
+                        filePath = fs.realpathSync(options.projectFile);
+                    } catch (notfound) {
+                        filePath = fs.realpathSync("." + path.sep + options.projectFile);
+                    }
+                    rootDir = path.dirname(filePath);
+                    projectFile = parser.loadProjectFile(filePath);
+                    registry = parser.createRegistry(projectFile);
+                } else {
+                    var root = findProjectRoot();
+                    rootDir = root.dir;
+                    projectFile = parser.loadProjectFile(root.file);
+                    registry = parser.createRegistry(projectFile);
+                }
+            } catch (e) {
+                if (hasCallback) {
+                    options.callback.call(null, {
+                        'message': "Error resolving project file", 
+                        'error': e
+                    });
+                    return;
+                } else {
+                    throw e;
+                }
+            }
+
+            // run project
             var runner = new ProjectJsRunner();
-            runner.run(root.dir, projectFile, registry);
+            if (hasCallback) {
+                runner.run(rootDir, projectFile, registry, options.callback);
+            } else {
+                runner.run(rootDir, projectFile, registry);
+            }
         };
 
     };

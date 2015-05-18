@@ -417,9 +417,32 @@ sc.command("build", {
 // run
 sc.command("run", {
     desc: "Compiles and runs the project",
-    callback: function() {
-        projectJs.run();
+    callback: function(options) {
+        var cb = function(err) {
+            if (_.isUndefined(err) || err === null) {
+                console.log("\n");
+                console.log("run complete");
+            } else if (err !== null) {
+                console.error("ERROR: %s", err.message);
+                if (err.error) {
+                    console.error(err.error);
+                }
+            }
+        };
+        if (_.has(options, 'file') && !_.isEmpty(options.file)) {
+            projectJs.run({
+                'projectFile': options.file,
+                'callback': cb
+            });
+        } else {
+            projectJs.run({
+                'callback': cb
+            });
+        }
     }
+}).option('file', {
+    abbr: 'f',
+    desc: "Path to the project.json file to run. Optional."
 });
 
 sc.parse();
