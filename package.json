@@ -1,7 +1,8 @@
 {
   "name": "projectjs",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Javaish project structure to bring order to your Node apps",
+  "main": "project.js",
   "scripts": {
     "test": "jasmine"
   },
