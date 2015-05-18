@@ -50,7 +50,7 @@ module.exports = (function() {
             if (!hasNs && hasCallback) {
                 options.callback.call(null, new Error("Base namespace is required!"));
                 return;
-            } else if (hasNs) {
+            } else if (!hasNs) {
                 throw new Error("Base namespace is required!");
             }
 
@@ -60,7 +60,7 @@ module.exports = (function() {
             if (isProject && hasCallback) {
                 options.callback.call(null, new Error("A project already exists in this directory"));
                 return;
-            } else {
+            } else if (isProject) {
                 throw new Error("A project already exists in this directory");
             }
 
@@ -208,14 +208,31 @@ module.exports = (function() {
             console.log("Dependency %s added", options['name']);
         };
 
+        /**
+         * Adds a shorthand alias for the given class
+         * @param {String}   alias     Alias
+         * @param {String}   className Full name of class
+         * @param {Function} callback  Callback function
+         */
         this.addAlias = function(options) {
             var ProjectJsParser = require('./lib/parser'),
                 _ = require('underscore');
 
-            if (!_.has(options, "alias") || _.isEmpty(options['alias'])) {
+            // check for required options
+            var hasAlias = (_.has(options, "alias") && !_.isEmpty(options['alias'])),
+                hasClassName = (_.has(options, "className") && !_.isEmpty(options['className'])),
+                hasCallback = (_.has(options, 'callback') && _.isFunction(options.callback));
+
+            if (!hasAlias && hasCallback) {
+                options.callback.call(null, new Error("Alias is required!"));
+                return;
+            } else if (!hasAlias) {
                 throw new Error("Alias is required!");
-            } else if (!_.has(options, "class") || _.isEmpty(options['class'])) {
-                throw new Error("Class is required!");
+            } else if (!hasClassName && hasCallback) {
+                options.callback.call(null, new Error("Class name is required!"));
+                return;
+            } else if (!hasClassName) {
+                throw new Error("Class name is required!");
             }
 
             var root = findProjectRoot(),
@@ -226,9 +243,17 @@ module.exports = (function() {
             
             projectFile.addAlias(options['alias'], options['class']);
             writeProjectFile(projectFile, root.file);
-            console.log("Alias added");
+            
+            if (hasCallback) {
+                options.callback.call(null, null, {'success': true, 'alias': options['alias']});
+            }
         };
 
+        /**
+         * Removes an existing alias from the project
+         * @param  {String}   alias    Alias to remove
+         * @param  {Function} callback Callback function
+         */
         this.removeAlias = function(options) {
             var ProjectJsParser = require('./lib/parser'),
                 _ = require('underscore');
@@ -259,11 +284,21 @@ module.exports = (function() {
             }
         };
 
+        /**
+         * Sets the project's start point to a particular script file
+         * @param {String}   script   Path to script file
+         * @param {Function} callback Callback function
+         */
         this.setStartScript = function(options) {
             var _ = require('underscore'),
                 ProjectJsParser = require('./lib/parser');
 
-            if (!_.has(options, "script") || _.isEmpty(options.script)) {
+            var hasScript = (_.has(options, "script") && !_.isEmpty(options.script)),
+                hasCallback = (_.has(options, 'callback') && _.isFunction(options.callback));
+
+            if (!hasScript && hasCallback) {
+                options.callback.call(null, null, new Error("Script parameter is required"));
+            } else if (!hasScript) {
                 throw new Error("Script parameter is required");
             }
 
@@ -272,18 +307,41 @@ module.exports = (function() {
                 projectFile = parser.loadProjectFile(root.file);
 
             // TODO: add more verification / check to make sure file exists / is a file path
+            // TODO: also make sure script path is relative to src or root folder
             
             projectFile.setStart(options.script);
             writeProjectFile(projectFile, root.file);
-            console.log("Start point set");
+            
+            if (hasCallback) {
+                options.callback.call(null, null, {'success': true, 'filePath': options.script});
+            }
         };
 
+        /**
+         * Sets the project's start point to a particular class and method
+         * @param {String}   className Name of starting class. Required.
+         * @param {String}   method    Name of start method. Required.
+         * @param {String}   output    Name or path of script to output on build
+         * @param {Function} callback  Callback function
+         */
         this.setStartClass = function(options) {
             var _ = require('underscore'),
                 ProjectJsParser = require('./lib/parser');
 
-            if (!_.has(options, "class") || !_.has(options, "method")) {
-                throw new Error("Required parameter missing");
+            var hasClassName = (_.has(options, 'className') && !_.isEmpty(options.className)),
+                hasMethod = (_.has(options, 'method') && !_.isEmpty(options.method)),
+                hasCallback = (_.has(options, 'callback') && _.isFunction(options.callback));
+
+            if (!hasClassName && hasCallback) {
+                options.callback.call(null, new Error("Class name is required"));
+                return;
+            } else if (!hasClassName) {
+                throw new Error("Class name is required");
+            } else if (!hasMethod && hasCallback) {
+                options.callback.call(null, new Error("Method is required"));
+                return;
+            } else if (!hasMethod) {
+                throw new Error("Method is required");
             }
 
             var root = findProjectRoot(),
@@ -300,26 +358,59 @@ module.exports = (function() {
             }
 
             projectFile.setStart({
-                "class": options["class"],
+                "class": options["className"],
                 "method": options["method"],
                 "output": options["output"]
             });
             writeProjectFile(projectFile, root.file);
-            console.log("Start point set");
+            
+            if (hasCallback) {
+                options.callback.call(null, null, {'success': true});
+            }
         };
 
-        this.build = function() {
+        /**
+         * Builds a project.
+         * @param  {String}   projectFile Path to project file to build. Optional.
+         * @param  {Function} callback    Callback function
+         */
+        this.build = function(options) {
             var ProjectJsParser = require('./lib/parser'),
-                ProjectJsCompiler = require('./lib/compiler');
+                ProjectJsCompiler = require('./lib/compiler'),
+                _ = require('underscore');
 
-            var root = findProjectRoot(),
-                parser = new ProjectJsParser(),
-                projectFile = parser.loadProjectFile(root.file),
+            var parser = new ProjectJsParser(),
+                projectFile,
+                registry,
+                hasCallback = (_.has(options, 'callback') && _.isFunction(options.callback));
+
+            if (_.has(options, 'projectFile') && !_.isEmpty(options.projectFile)) {
+                try {
+                    projectFile = parser.loadProjectFile(options.projectFile);
+                    registry = parser.createRegistry(projectFile);
+                } catch (e) {
+                    if (hasCallback) {
+                        options.callback.call(null, {
+                            'message': "Unable to load project file",
+                            'error': e
+                        });
+                    } else {
+                        throw e;
+                    }
+                    return;
+                }
+            } else {
+                var root = findProjectRoot();
+                projectFile = parser.loadProjectFile(root.file);
                 registry = parser.createRegistry(projectFile);
+            }
 
             var compiler = new ProjectJsCompiler();
             compiler.buildProject(projectFile, registry);
-            console.log("build complete");
+            
+            if (hasCallback) {
+                options.callback.call(null, null, {'success': true});
+            }
         };
 
         this.run = function() {

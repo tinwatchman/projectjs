@@ -250,7 +250,14 @@ var aliasCallback = function(options) {
     }
     projectJs.addAlias({
         'alias': options.alias,
-        'class': options.name
+        'className': options.name,
+        'callback': function(err, info) {
+            if (err === null && info.success === true) {
+                console.log("Alias %s created!", info.alias);
+            } else if (err !== null) {
+                console.error("ERROR: %s", err.message);
+            }
+        }
     });
 };
 sc.command('add-alias', {
@@ -299,7 +306,7 @@ sc.command('rm-alias', {
                     console.error("ERROR: %s", err.message);
                 }
             }
-        })
+        });
     }
 }).option('alias', {
     abbr: 'a',
@@ -326,7 +333,14 @@ sc.command('set-start', {
 
             if (isFileSet) {
                 projectJs.setStartScript({
-                    "script": options.file
+                    "script": options.file,
+                    "callback": function(err, info) {
+                        if (err === null && info.success === true) {
+                            console.log("Start point set to %s", info.filePath);
+                        } else if (err !== null) {
+                            console.error("ERROR: %s", err.message);
+                        }
+                    }
                 });
             }
 
@@ -346,7 +360,18 @@ sc.command('set-start', {
                 );
 
             if (isClassSet && isMethodSet) {
-                projectJs.setStartClass(options);
+                projectJs.setStartClass({
+                    'className': options['class'],
+                    'method': options['method'],
+                    'output': _.has(options, 'output') ? options.output : '',
+                    'callback': function(err, info) {
+                        if (err === null && info.success === true) {
+                            console.log("Start point set");
+                        } else if (err !== null) {
+                            console.error("ERROR: %s", err.message);
+                        }
+                    }
+                });
             }
         }
     }
@@ -371,9 +396,22 @@ sc.command('set-start', {
 // build
 sc.command("build", {
     desc: 'Builds the project, removing any dependencies on ProjectJs',
-    callback: function() {
-        projectJs.build();
+    callback: function(options) {
+        var filePath = _.has(options, 'file') ? options['file'] : "";
+        projectJs.build({
+            'projectFile': filePath,
+            'callback': function(err, info) {
+                if (err === null && info.success) {
+                    console.log("build complete");
+                } else if (err !== null) {
+                    console.error("ERROR: %s", err.message);
+                }
+            }
+        });
     }
+}).option('file', {
+    abbr: 'f',
+    desc: "Path to the project.json file to build. Optional."
 });
 
 // run
