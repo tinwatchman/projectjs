@@ -12,7 +12,10 @@ You can also access documentation by entering `projectjs -h` into the command li
 
 ---
 
-### rm-alias
+## rm-alias
+
+Removes a class alias from the project.
+
 <a name="rm-alias-example"></a>
 #### Example
 ```shell
@@ -23,10 +26,10 @@ projectjs rm-alias Application
 * `--alias`, `-a`: Name of alias to remove. Required.
 * `--force`, `-f`: Force remove without asking for confirmation
 
+## rmclass
 
----
+Removes a class from the project.
 
-### rmclass
 <a name="rmclass-example"></a>
 #### Example
 ```shell
@@ -37,6 +40,3 @@ projectjs rmclass my.project.ClassName
 * `--name`, `-n`: Full name of class to remove. Required.
 * `--force`, `-f`: Force remove without asking for confirmation
 * `--cache`, `-c`: Retain class file on disk
-
-
----
