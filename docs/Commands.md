@@ -1,5 +1,4 @@
-# project.js Commands
----------------------
+# project.js Command Documentation
 
 ## Table of Contents
 * [rm-alias](#rm-alias)
@@ -13,27 +12,27 @@ You can also access documentation by entering `projectjs -h` into the command li
 
 ---
 
-## rm-alias
+### rm-alias
 <a name="rm-alias-example"></a>
-### Example
+#### Example
 ```shell
 projectjs rm-alias Application
 ```
 <a name="rm-alias-options"></a>
-### Options
+#### Options
 * `--alias`, `-a`: Name of alias to remove. Required.
-* '--force', '-f': Force remove without asking for confirmation
+* `--force`, `-f`: Force remove without asking for confirmation
 
 ---
 
-## rmclass
+### rmclass
 <a name="rmclass-example"></a>
-### Example
+#### Example
 ```shell
 projectjs rmclass my.project.ClassName
 ```
 <a name="rmclass-options"></a>
-### Options
+#### Options
 * `--name`, `-n`: Full name of class to remove. Required.
 * `--force`, `-f`: Force remove without asking for confirmation
 * `--cache`, `-c`: Retain class file on disk
