@@ -3,13 +3,13 @@
 
 ## Table of Contents
 * [rm-alias](#rm-alias)
-** [Example](#rm-alias-example)
-** [Options](#rm-alias-options)
+  * [Example](#rm-alias-example)
+  * [Options](#rm-alias-options)
 * [rmclass](#rmclass)
-** [Example](#rmclass-example)
-** [Options](#rmclass-options)
+  * [Example](#rmclass-example)
+  * [Options](#rmclass-options)
 
-You can also access this documentation by entering `projectjs -h` into the command line.
+You can also access documentation by entering `projectjs -h` into the command line.
 
 ---
 

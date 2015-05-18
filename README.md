@@ -182,7 +182,9 @@ projectjs build
 
 As has been mentioned, building the project will compile and output it in a form that can be processed without project.js. All `use` statements will be removed and replaced with standard `require` imports.
 
-For more information on commands, type in `projectjs -h` into the command line.
+### More Information
+
+For more information on commands, either type in `projectjs -h` into the command line, or see the [Command documentation](https://github.com/tinwatchman/projectjs/blob/master/docs/Commands.md).
 
 ## Features
 
