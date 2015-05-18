@@ -44,7 +44,7 @@ The content of your project.json file will look something like this:
     "start": "",
     "schema": {
         "name": "projectjs",
-        "version": "0.0.3"
+        "version": "0.0.4"
     }
 }
 ```
