@@ -23,6 +23,7 @@ projectjs rm-alias Application
 * `--alias`, `-a`: Name of alias to remove. Required.
 * `--force`, `-f`: Force remove without asking for confirmation
 
+
 ---
 
 ### rmclass
@@ -36,3 +37,6 @@ projectjs rmclass my.project.ClassName
 * `--name`, `-n`: Full name of class to remove. Required.
 * `--force`, `-f`: Force remove without asking for confirmation
 * `--cache`, `-c`: Retain class file on disk
+
+
+---
